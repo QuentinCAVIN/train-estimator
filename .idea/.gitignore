@@ -26,3 +26,8 @@ Thumbs.db
 *.jar
 *.war
 *.ear
+/kotlinc.xml
+/misc.xml
+/modules.xml
+/inspectionProfiles/Project_Default.xml
+/vcs.xml

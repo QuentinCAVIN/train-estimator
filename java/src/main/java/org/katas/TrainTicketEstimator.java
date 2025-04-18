@@ -28,12 +28,12 @@ public class TrainTicketEstimator {
         if (trainDetails.details().to().trim().isEmpty()) {
             throw new InvalidTripInputException("Destination city is invalid");
         }
+//        TODO Vérifier qu'on a pas de null
         // Vérification de la validité de la date (doit être dans le futur)
         if (trainDetails.details().when().before(new Date())) {
             throw new InvalidTripInputException("Date is invalid");
         }
 
-        // Start of Calling API
         // Appel à l’API pour obtenir le prix de base du trajet
         double basePrice = getBasePrice(trainDetails);
 

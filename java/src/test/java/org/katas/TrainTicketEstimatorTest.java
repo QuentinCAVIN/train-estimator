@@ -86,4 +86,40 @@ class TrainTicketEstimatorTest {
         });
         assertEquals("Date is invalid", exception.getMessage());
     }
+    @Test
+    void estimateTrainsWithInvalidAge_ShouldThrowException() {
+        TripRequest request = new TripRequestBuilder()
+                .withDetails(new TripDetailsBuilder()
+                        .from("Bordeaux")
+                        .to("Paris")
+                        .build())
+                .withPassenger(new PassengerBuilder()
+                        .age(-1)
+                        .build())
+                .build();
+
+        TrainTicketEstimatorStub trainEstimator = new TrainTicketEstimatorStub();
+        InvalidTripInputException exception = assertThrows(InvalidTripInputException.class, () -> {
+            trainEstimator.estimate(request);
+        });
+        assertEquals("Age is invalid", exception.getMessage());
+    }
+
+    //TODO BUG Détécté sur les enfants
+    @Test
+    void estimateTrainsWithAge_ShouldThrowException() {
+        TripRequest request = new TripRequestBuilder()
+                .withDetails(new TripDetailsBuilder()
+                        .from("Bordeaux")
+                        .to("Paris")
+                        .build())
+                .withPassenger(new PassengerBuilder()
+                        .age(0)
+                        .build())
+                .build();
+
+        TrainTicketEstimatorStub trainEstimator = new TrainTicketEstimatorStub();
+        assertEquals(0, trainEstimator.estimate(request));
+    }
+
 }

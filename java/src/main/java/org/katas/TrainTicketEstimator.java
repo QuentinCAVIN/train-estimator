@@ -40,6 +40,7 @@ public class TrainTicketEstimator {
         // Liste des passagers
         List<Passenger> passengers = trainDetails.passengers();
         double total = 0;
+        // TODO Après test voir si on peux modifier temp en prixTotal
         double temp;
 
         for (Passenger passenger : passengers) {
@@ -49,19 +50,7 @@ public class TrainTicketEstimator {
                 throw new InvalidTripInputException("Age is invalid");
             }
 
-            // Tarification selon l'âge
-            if (passenger.age() < 1) {
-                temp = 0;
-            } else if (passenger.age() <= 17) {
-                temp = basePrice * 0.6;
-            } else if (passenger.age() >= 70) {
-                temp = basePrice * 0.8;
-                if (passenger.discounts().contains(DiscountCard.Senior)) {
-                    temp -= basePrice * 0.2;
-                }
-            } else {
-                temp = basePrice * 1.2;
-            }
+            temp = getTotalPrice(passenger, basePrice);
 
             // Réduction si réservation anticipée (> 30 jours)
             Date currentDate = new Date();
@@ -132,6 +121,24 @@ public class TrainTicketEstimator {
 
         // Prix final estimé
         return total;
+    }
+
+    private double getTotalPrice(Passenger passenger, double basePrice) {
+        double temp;
+        // Tarification selon l'âge
+        if (passenger.age() < 1) {
+            temp = 0;
+        } else if (passenger.age() <= 17) {
+            temp = basePrice * 0.6;
+        } else if (passenger.age() >= 70) {
+            temp = basePrice * 0.8;
+            if (passenger.discounts().contains(DiscountCard.Senior)) {
+                temp -= basePrice * 0.2;
+            }
+        } else {
+            temp = basePrice * 1.2;
+        }
+        return temp;
     }
 
     // On inclu (et on ne teste pas) l'ApiExcpetion Fréd et Eric sont ok avec ça

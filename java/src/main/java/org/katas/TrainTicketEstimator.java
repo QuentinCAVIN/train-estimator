@@ -52,7 +52,7 @@ public class TrainTicketEstimator {
 
             temp = getBasePriceBasedOnAge(passenger, basePrice);
 
-            // Réduction si réservation anticipée (> 30 jours)
+            // Appel méthode de calcul du prix en fonction de la date de départ
             temp = changesBasePriceDependingOnDate(trainDetails, temp, basePrice);
 
             // Réduction spéciale carte TrainStroke
@@ -62,7 +62,6 @@ public class TrainTicketEstimator {
 
             // Ajout au total et réinitialisation
             total += temp;
-            temp = basePrice;
         }
 
         // Réduction couple (2 passagers adultes avec carte Couple)

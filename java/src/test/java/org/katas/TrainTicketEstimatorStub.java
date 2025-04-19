@@ -3,12 +3,12 @@ package org.katas;
 import org.katas.model.TripRequest;
 
 public class TrainTicketEstimatorStub extends TrainTicketEstimator {
-    double price = 100;
+    double basePrice = 100;
     @Override
     public double getBasePrice(TripRequest trainDetails) {
-        return price;
+        return basePrice;
     }
-    public void setPrice(int price){
-        this.price = price;
+    public void setBasePrice(int price){
+        this.basePrice = price;
     }
 }

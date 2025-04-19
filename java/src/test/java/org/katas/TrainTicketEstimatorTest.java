@@ -269,4 +269,105 @@ class TrainTicketEstimatorTest {
         TrainTicketEstimatorStub trainEstimator = new TrainTicketEstimatorStub();
         assertEquals(140, trainEstimator.changesBasePriceDependingOnDate(request, priceModified, basePrice));
     }
+
+    @Test
+    void estimateTrainsWithCoupleAndDiscountCardCouple() {
+        TripRequest request = new TripRequestBuilder()
+                .withDetails(new TripDetailsBuilder()
+                        .from("Bordeaux")
+                        .to("Paris")
+                        .build())
+                .withPassenger(new PassengerBuilder()
+                        .age(36)
+                        .withDiscount(DiscountCard.Couple)
+                        .build())
+                .withPassenger(new PassengerBuilder()
+                        .age(39)
+                        .withDiscount(DiscountCard.Couple)
+                        .build())
+                .build();
+
+        TrainTicketEstimatorStub trainEstimator = new TrainTicketEstimatorStub();
+        trainEstimator.setBasePrice(100);
+
+        assertEquals(400, trainEstimator.estimate(request));
+    }
+
+    @Test
+    void estimateTrainsWithCoupleAndNoDiscount() {
+        TripRequest request = new TripRequestBuilder()
+                .withDetails(new TripDetailsBuilder()
+                        .from("Bordeaux")
+                        .to("Paris")
+                        .build())
+                .withPassenger(new PassengerBuilder()
+                        .age(36)
+                        .withOutDiscount()
+                        .build())
+                .withPassenger(new PassengerBuilder()
+                        .age(39)
+                        .withOutDiscount()
+                        .build())
+                .build();
+
+        TrainTicketEstimatorStub trainEstimator = new TrainTicketEstimatorStub();
+        trainEstimator.setBasePrice(100);
+
+        assertEquals(440, trainEstimator.estimate(request));
+    }
+
+    @Test
+    void estimateTrainsWithNoCoupleAndDiscountCardHalfCouple() {
+        TripRequest request = new TripRequestBuilder()
+                .withDetails(new TripDetailsBuilder()
+                        .from("Bordeaux")
+                        .to("Paris")
+                        .build())
+                .withPassenger(new PassengerBuilder()
+                        .age(36)
+                        .withDiscount(DiscountCard.HalfCouple)
+                        .build())
+                .build();
+
+        TrainTicketEstimatorStub trainEstimator = new TrainTicketEstimatorStub();
+        trainEstimator.setBasePrice(100);
+
+        assertEquals(210, trainEstimator.estimate(request));
+    }
+    @Test
+    void estimateTrainsWithNoCoupleAndNoDiscount() {
+        TripRequest request = new TripRequestBuilder()
+                .withDetails(new TripDetailsBuilder()
+                        .from("Bordeaux")
+                        .to("Paris")
+                        .build())
+                .withPassenger(new PassengerBuilder()
+                        .age(36)
+                        .withOutDiscount()
+                        .build())
+                .build();
+
+        TrainTicketEstimatorStub trainEstimator = new TrainTicketEstimatorStub();
+        trainEstimator.setBasePrice(100);
+
+        assertEquals(220, trainEstimator.estimate(request));
+    }
+    @Test
+    void estimateTrainsWithDiscountCardTrainStroke() {
+        TripRequest request = new TripRequestBuilder()
+                .withDetails(new TripDetailsBuilder()
+                        .from("Bordeaux")
+                        .to("Paris")
+                        .build())
+                .withPassenger(new PassengerBuilder()
+                        .age(36)
+                        .withDiscount(DiscountCard.TrainStroke)
+                        .build())
+                .build();
+
+        TrainTicketEstimatorStub trainEstimator = new TrainTicketEstimatorStub();
+        trainEstimator.setBasePrice(100);
+
+        assertEquals(1, trainEstimator.estimate(request));
+    }
 }

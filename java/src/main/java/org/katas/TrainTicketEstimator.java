@@ -53,22 +53,7 @@ public class TrainTicketEstimator {
             temp = getBasePriceBasedOnAge(passenger, basePrice);
 
             // Réduction si réservation anticipée (> 30 jours)
-            Date currentDate = new Date();
-            currentDate.setDate(currentDate.getDate() +30);
-            if (trainDetails.details().when().getTime() >= currentDate.getTime() ) {
-                temp -= basePrice * 0.2;
-            } else {
-                // Sinon, majoration progressive si date proche
-                currentDate.setDate(currentDate.getDate() - 30 + 5);
-                if (trainDetails.details().when().getTime() > currentDate.getTime()) {
-                    currentDate.setDate(currentDate.getDate() - 5);
-                    var diffDays = ((int)((trainDetails.details().when().getTime()/(24*60*60*1000)) - (int)(currentDate.getTime()/(24*60*60*1000))));
-                    temp += (20 - diffDays) * 0.02 * basePrice;
-                } else {
-                    // Réservation très tardive → plein tarif + surcharge
-                    temp += basePrice;
-                }
-            }
+            temp = changesBasePriceDependingOnDate(trainDetails, temp, basePrice);
 
             // Tarification enfant (entre 1 et 4 ans) = 9 €
             if (passenger.age() > 0 && passenger.age() < 4) {
@@ -121,6 +106,33 @@ public class TrainTicketEstimator {
 
         // Prix final estimé
         return total;
+    }
+
+    // TODO Refactor pour envisager de mettre la variable basePrice en constante?
+    protected double changesBasePriceDependingOnDate(TripRequest trainDetails, double temp, double basePrice) {
+// DATE CHOISI = 10/05/2025
+        Date currentDate = new Date();
+//  NOUS SOMME LE   01/05/2025
+        currentDate.setDate(currentDate.getDate() + 30);
+//        31/05/2025
+        if (trainDetails.details().when().getTime() >= currentDate.getTime() ) {
+            temp -= basePrice * 0.2;
+        } else {
+            // Sinon, majoration progressive si date proche
+            currentDate.setDate(currentDate.getDate() - 30 + 5);
+//            06/05/2025
+            if (trainDetails.details().when().getTime() > currentDate.getTime()) {
+//                10/05/2025   >   06/05/2025
+                currentDate.setDate(currentDate.getDate() - 5);
+//                01/05/2025
+                var diffDays = ((int)((trainDetails.details().when().getTime()/(24*60*60*1000)) - (int)(currentDate.getTime()/(24*60*60*1000))));
+                temp += (20 - diffDays) * 0.02 * basePrice;
+            } else {
+                // Réservation très tardive → plein tarif + surcharge
+                temp += basePrice;
+            }
+        }
+        return temp;
     }
 
     protected double getBasePriceBasedOnAge(Passenger passenger, double basePrice) {

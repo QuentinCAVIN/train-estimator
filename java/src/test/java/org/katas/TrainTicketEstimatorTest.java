@@ -12,11 +12,6 @@ import static org.junit.jupiter.api.Assertions.*;
 class TrainTicketEstimatorTest {
 
     @Test
-    void should_NotWork() {
-        assertEquals(3, 1+2);
-    }
-  
-    @Test
     void estimateTrainsWithoutNoPassager_ShouldReturn0() {
         TripRequest request = new TripRequestBuilder()
                 .withDetails(new TripDetailsBuilder()
@@ -88,6 +83,7 @@ class TrainTicketEstimatorTest {
         });
         assertEquals("Date is invalid", exception.getMessage());
     }
+
     @Test
     void estimateTrainsWithInvalidAge_ShouldThrowException() {
         TripRequest request = new TripRequestBuilder()
@@ -123,6 +119,16 @@ class TrainTicketEstimatorTest {
 //        TrainTicketEstimatorStub trainEstimator = new TrainTicketEstimatorStub();
 //        assertEquals(0, trainEstimator.estimate(request));
 //    }
+    @Test
+    void BasePriceWithAge0_ShouldReturn0e() {
+        double basePrice = 100.00;
+        Passenger passenger = new PassengerBuilder()
+                .age(0)
+                .build();
+
+        TrainTicketEstimatorStub trainEstimator = new TrainTicketEstimatorStub();
+        assertEquals(0, trainEstimator.getBasePriceBasedOnAge(passenger, basePrice));
+    }
 
     @Test
     void BasePriceWithAge15_ShouldReturn160e() {
@@ -134,6 +140,7 @@ class TrainTicketEstimatorTest {
         TrainTicketEstimatorStub trainEstimator = new TrainTicketEstimatorStub();
         assertEquals(60, trainEstimator.getBasePriceBasedOnAge(passenger, basePrice));
     }
+
     @Test
     void BasePriceWithAge37_ShouldReturn120e() {
         double basePrice = 100.00;
@@ -146,7 +153,7 @@ class TrainTicketEstimatorTest {
     }
 
     @Test
-    void BasePriceWithAge70WithoutDiscountCard_ShouldReturn160€() {
+    void BasePriceWithAge70WithoutDiscountCard_ShouldReturn80e() {
         double basePrice = 100.00;
         Passenger passenger = new PassengerBuilder()
                 .age(70)
@@ -158,7 +165,7 @@ class TrainTicketEstimatorTest {
     }
 
     @Test
-    void BasePriceWithAge70WitDiscountCard_ShouldReturn160€() {
+    void BasePriceWithAge70WitDiscountCard_ShouldReturn60e() {
         double basePrice = 100.00;
         Passenger passenger = new PassengerBuilder()
                 .withDiscount(DiscountCard.Senior)
@@ -167,5 +174,89 @@ class TrainTicketEstimatorTest {
 
         TrainTicketEstimatorStub trainEstimator = new TrainTicketEstimatorStub();
         assertEquals(60, trainEstimator.getBasePriceBasedOnAge(passenger, basePrice));
+    }
+
+    @Test
+    void UpdateBasePriceAccordingToDate_departureDateIn31Days() {
+        double basePrice = 100.00;
+        double priceModified = 120;
+        Date in31Days = new Date(System.currentTimeMillis() + 31L * 24 * 60 * 60 * 1000);
+
+        TripRequest request = new TripRequestBuilder()
+                .withDetails(new TripDetailsBuilder()
+                        .from("Bordeaux")
+                        .to("Paris")
+                        .when(in31Days)
+                        .build())
+                .withPassenger(new PassengerBuilder()
+                        .age(30)
+                        .build())
+                .build();
+
+        TrainTicketEstimatorStub trainEstimator = new TrainTicketEstimatorStub();
+        assertEquals(100, trainEstimator.changesBasePriceDependingOnDate(request, priceModified, basePrice));
+    }
+
+    @Test
+    void UpdateBasePriceAccordingToDate_departureDateTomorrow() {
+        double basePrice = 100.00;
+        double priceModified = 120;
+        Date tomorrow = new Date(System.currentTimeMillis() + 24 * 60 * 60 * 1000);
+
+        TripRequest request = new TripRequestBuilder()
+                .withDetails(new TripDetailsBuilder()
+                        .from("Bordeaux")
+                        .to("Paris")
+                        .when(tomorrow)
+                        .build())
+                .withPassenger(new PassengerBuilder()
+                        .age(30)
+                        .build())
+                .build();
+
+        TrainTicketEstimatorStub trainEstimator = new TrainTicketEstimatorStub();
+        assertEquals(220, trainEstimator.changesBasePriceDependingOnDate(request, priceModified, basePrice));
+    }
+
+    @Test
+    void UpdateBasePriceAccordingToDate_departureDateIn5Days() {
+        double basePrice = 100.00;
+        double priceModified = 120;
+        Date In5Days = new Date(System.currentTimeMillis() + 5 * 24 * 60 * 60 * 1000);
+
+        TripRequest request = new TripRequestBuilder()
+                .withDetails(new TripDetailsBuilder()
+                        .from("Bordeaux")
+                        .to("Paris")
+                        .when(In5Days)
+                        .build())
+                .withPassenger(new PassengerBuilder()
+                        .age(30)
+                        .build())
+                .build();
+
+        TrainTicketEstimatorStub trainEstimator = new TrainTicketEstimatorStub();
+        assertEquals(220, trainEstimator.changesBasePriceDependingOnDate(request, priceModified, basePrice));
+    }
+
+    @Test
+    void UpdateBasePriceAccordingToDate_departureDateIn10Days() {
+        double basePrice = 100.00;
+        double priceModified = 120;
+        Date in10Days = new Date(System.currentTimeMillis() + 10 * 24 * 60 * 60 * 1000);
+
+        TripRequest request = new TripRequestBuilder()
+                .withDetails(new TripDetailsBuilder()
+                        .from("Bordeaux")
+                        .to("Paris")
+                        .when(in10Days)
+                        .build())
+                .withPassenger(new PassengerBuilder()
+                        .age(30)
+                        .build())
+                .build();
+
+        TrainTicketEstimatorStub trainEstimator = new TrainTicketEstimatorStub();
+        assertEquals(140, trainEstimator.changesBasePriceDependingOnDate(request, priceModified, basePrice));
     }
 }

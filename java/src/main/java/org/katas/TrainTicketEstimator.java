@@ -55,11 +55,6 @@ public class TrainTicketEstimator {
             // Réduction si réservation anticipée (> 30 jours)
             temp = changesBasePriceDependingOnDate(trainDetails, temp, basePrice);
 
-            // Tarification enfant (entre 1 et 4 ans) = 9 €
-            if (passenger.age() > 0 && passenger.age() < 4) {
-                temp = 9;
-            }
-
             // Réduction spéciale carte TrainStroke
             if (passenger.discounts().contains(DiscountCard.TrainStroke)) {
                 temp = 1;
@@ -141,6 +136,8 @@ public class TrainTicketEstimator {
         // Tarification selon l'âge
         if (age < 1) {
             temp = 0;
+        } else if (age > 0 && age < 4){
+            temp = 9;
         } else if (age <= 17) {
             temp = basePrice * 0.6;
         } else if (age >= 70) {

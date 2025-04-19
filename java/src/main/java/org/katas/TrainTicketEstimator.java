@@ -50,7 +50,7 @@ public class TrainTicketEstimator {
                 throw new InvalidTripInputException("Age is invalid");
             }
 
-            temp = getTotalPrice(passenger, basePrice);
+            temp = getBasePriceBasedOnAge(passenger, basePrice);
 
             // Réduction si réservation anticipée (> 30 jours)
             Date currentDate = new Date();
@@ -123,14 +123,15 @@ public class TrainTicketEstimator {
         return total;
     }
 
-    private double getTotalPrice(Passenger passenger, double basePrice) {
+    protected double getBasePriceBasedOnAge(Passenger passenger, double basePrice) {
         double temp;
+        int age = passenger.age();
         // Tarification selon l'âge
-        if (passenger.age() < 1) {
+        if (age < 1) {
             temp = 0;
-        } else if (passenger.age() <= 17) {
+        } else if (age <= 17) {
             temp = basePrice * 0.6;
-        } else if (passenger.age() >= 70) {
+        } else if (age >= 70) {
             temp = basePrice * 0.8;
             if (passenger.discounts().contains(DiscountCard.Senior)) {
                 temp -= basePrice * 0.2;

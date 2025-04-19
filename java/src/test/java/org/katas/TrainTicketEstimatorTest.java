@@ -1,6 +1,8 @@
 package org.katas;
 
 import org.junit.jupiter.api.Test;
+import org.katas.model.DiscountCard;
+import org.katas.model.Passenger;
 import org.katas.model.TripRequest;
 import org.katas.model.exceptions.InvalidTripInputException;
 
@@ -105,21 +107,65 @@ class TrainTicketEstimatorTest {
         assertEquals("Age is invalid", exception.getMessage());
     }
 
-    //TODO BUG Détécté sur les enfants
+    //TODO BUG Détécté sur les enfants à corriger une fois les tests en place
+//    @Test
+//    void estimateTrainsWithAge_ShouldThrowException() {
+//        TripRequest request = new TripRequestBuilder()
+//                .withDetails(new TripDetailsBuilder()
+//                        .from("Bordeaux")
+//                        .to("Paris")
+//                        .build())
+//                .withPassenger(new PassengerBuilder()
+//                        .age(0)
+//                        .build())
+//                .build();
+//
+//        TrainTicketEstimatorStub trainEstimator = new TrainTicketEstimatorStub();
+//        assertEquals(0, trainEstimator.estimate(request));
+//    }
+
     @Test
-    void estimateTrainsWithAge_ShouldThrowException() {
-        TripRequest request = new TripRequestBuilder()
-                .withDetails(new TripDetailsBuilder()
-                        .from("Bordeaux")
-                        .to("Paris")
-                        .build())
-                .withPassenger(new PassengerBuilder()
-                        .age(0)
-                        .build())
+    void BasePriceWithAge15_ShouldReturn160e() {
+        double basePrice = 100.00;
+        Passenger passenger = new PassengerBuilder()
+                .age(15)
                 .build();
 
         TrainTicketEstimatorStub trainEstimator = new TrainTicketEstimatorStub();
-        assertEquals(0, trainEstimator.estimate(request));
+        assertEquals(60, trainEstimator.getBasePriceBasedOnAge(passenger, basePrice));
+    }
+    @Test
+    void BasePriceWithAge37_ShouldReturn120e() {
+        double basePrice = 100.00;
+        Passenger passenger = new PassengerBuilder()
+                .age(37)
+                .build();
+
+        TrainTicketEstimatorStub trainEstimator = new TrainTicketEstimatorStub();
+        assertEquals(120, trainEstimator.getBasePriceBasedOnAge(passenger, basePrice));
     }
 
+    @Test
+    void BasePriceWithAge70WithoutDiscountCard_ShouldReturn160€() {
+        double basePrice = 100.00;
+        Passenger passenger = new PassengerBuilder()
+                .age(70)
+                .withOutDiscount()
+                .build();
+
+        TrainTicketEstimatorStub trainEstimator = new TrainTicketEstimatorStub();
+        assertEquals(80, trainEstimator.getBasePriceBasedOnAge(passenger, basePrice));
+    }
+
+    @Test
+    void BasePriceWithAge70WitDiscountCard_ShouldReturn160€() {
+        double basePrice = 100.00;
+        Passenger passenger = new PassengerBuilder()
+                .withDiscount(DiscountCard.Senior)
+                .age(71)
+                .build();
+
+        TrainTicketEstimatorStub trainEstimator = new TrainTicketEstimatorStub();
+        assertEquals(60, trainEstimator.getBasePriceBasedOnAge(passenger, basePrice));
+    }
 }

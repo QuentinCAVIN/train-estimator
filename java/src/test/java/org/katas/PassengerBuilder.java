@@ -19,6 +19,9 @@ public class PassengerBuilder {
         this.discounts.add(card);
         return this;
     }
+    public PassengerBuilder withOutDiscount() {
+        return this;
+    }
 
     public PassengerBuilder withDiscounts(List<DiscountCard> cards) {
         this.discounts = cards;

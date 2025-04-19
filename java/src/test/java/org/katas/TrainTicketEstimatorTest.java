@@ -129,6 +129,16 @@ class TrainTicketEstimatorTest {
         TrainTicketEstimatorStub trainEstimator = new TrainTicketEstimatorStub();
         assertEquals(0, trainEstimator.getBasePriceBasedOnAge(passenger, basePrice));
     }
+    @Test
+    void BasePriceWithAge2_ShouldReturn() {
+        double basePrice = 100.00;
+        Passenger passenger = new PassengerBuilder()
+                .age(2)
+                .build();
+
+        TrainTicketEstimatorStub trainEstimator = new TrainTicketEstimatorStub();
+        assertEquals(9, trainEstimator.getBasePriceBasedOnAge(passenger, basePrice));
+    }
 
     @Test
     void BasePriceWithAge15_ShouldReturn160e() {

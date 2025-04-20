@@ -3,37 +3,23 @@ package org.katas;
 import org.katas.model.DiscountCard;
 import org.katas.model.Passenger;
 import org.katas.model.TripRequest;
-import org.katas.model.exceptions.InvalidTripInputException;
 import org.katas.repository.IBasePriceRepository;
 import java.util.Date;
 import java.util.List;
 
 public class TrainTicketEstimator {
 
+    TripRequest trainDetails;
     IBasePriceRepository basePriceRepository;
 
-    public TrainTicketEstimator(IBasePriceRepository basePriceRepository) {
+    public TrainTicketEstimator(IBasePriceRepository basePriceRepository, TripRequest trainDetails) {
         this.basePriceRepository = basePriceRepository;
+        this.trainDetails = trainDetails;
+        trainDetails.isValid();
     }
 
     // Si aucun passager, le prix est 0
-    public double estimate(TripRequest trainDetails) {
-        if (trainDetails.passengers().isEmpty()) {
-            return 0;
-        }
-        // Vérification du nom de la ville de départ
-        if (trainDetails.details().from().trim().isEmpty()) {
-            throw new InvalidTripInputException("Start city is invalid");
-        }
-        // Vérification du nom de la ville d'arrivée
-        if (trainDetails.details().to().trim().isEmpty()) {
-            throw new InvalidTripInputException("Destination city is invalid");
-        }
-//        TODO Vérifier qu'on a pas de null
-        // Vérification de la validité de la date (doit être dans le futur)
-        if (trainDetails.details().when().before(new Date())) {
-            throw new InvalidTripInputException("Date is invalid");
-        }
+    public double estimate() {
 
         // Appel à l’API pour obtenir le prix de base du trajet
         double basePrice = basePriceRepository.getBasePrice(trainDetails);
@@ -46,12 +32,8 @@ public class TrainTicketEstimator {
 
         for (Passenger passenger : passengers) {
 
-            // Vérification de l'âge
-            if (passenger.age() < 0) {
-                throw new InvalidTripInputException("Age is invalid");
-            }
-
-            temp = getBasePriceBasedOnAge(passenger, basePrice);
+            temp = passenger.getBasePriceBasedOnAge(basePrice);
+//            temp = getBasePriceBasedOnAge(passenger, basePrice);
 
             // Appel méthode de calcul du prix en fonction de la date de départ
             temp = changesBasePriceDependingOnDate(trainDetails, temp, basePrice);
@@ -126,27 +108,6 @@ public class TrainTicketEstimator {
                 // Réservation très tardive → plein tarif + surcharge
                 temp += basePrice;
             }
-        }
-        return temp;
-    }
-
-    protected double getBasePriceBasedOnAge(Passenger passenger, double basePrice) {
-        double temp;
-        int age = passenger.age();
-        // Tarification selon l'âge
-        if (age < 1) {
-            temp = 0;
-        } else if (age < 4){
-            temp = 9;
-        } else if (age <= 17) {
-            temp = basePrice * 0.6;
-        } else if (age >= 70) {
-            temp = basePrice * 0.8;
-            if (passenger.discounts().contains(DiscountCard.Senior)) {
-                temp -= basePrice * 0.2;
-            }
-        } else {
-            temp = basePrice * 1.2;
         }
         return temp;
     }

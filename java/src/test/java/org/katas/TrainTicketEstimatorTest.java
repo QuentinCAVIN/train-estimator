@@ -12,31 +12,32 @@ import java.util.Date;
 import static org.junit.jupiter.api.Assertions.*;
 class TrainTicketEstimatorTest {
 
-TrainTicketEstimator trainEstimator;
+TrainTicketEstimatorTestBuilder trainEstimatorBuilder;
 FakeBasePriceRepository fakeBasePriceRepository;
     @BeforeEach
     public void setUp() {
         fakeBasePriceRepository = new FakeBasePriceRepository();
-        trainEstimator = new TrainTicketEstimator(fakeBasePriceRepository);
+        trainEstimatorBuilder = new TrainTicketEstimatorTestBuilder(fakeBasePriceRepository);
     }
 
     @Test
     void estimateTrainsWithoutNoPassenger_ShouldReturn0() {
-        TripRequest request = new TripRequestBuilder()
+
+        TripRequest tripRequest = new TripRequestBuilder()
                 .withDetails(new TripDetailsBuilder()
-                        .from("")
-                        .to("")
-                        .when(null)
                         .build())
                 .withNoPassenger()
                 .build();
 
-        assertEquals(0, trainEstimator.estimate(request));
+        InvalidTripInputException exception = assertThrows(InvalidTripInputException.class, () -> {
+            trainEstimatorBuilder.withTripRequest(tripRequest).build();
+        });
+        assertEquals("No passenger", exception.getMessage());
     }
 
     @Test
     void estimateTrainsWithNoDepartureCity_ShouldThrowException() {
-        TripRequest request = new TripRequestBuilder()
+        TripRequest tripRequest = new TripRequestBuilder()
                 .withDetails(new TripDetailsBuilder()
                         .from("")
                         .to("Paris")
@@ -46,14 +47,14 @@ FakeBasePriceRepository fakeBasePriceRepository;
                 .build();
 
         InvalidTripInputException exception = assertThrows(InvalidTripInputException.class, () -> {
-            trainEstimator.estimate(request);
+            trainEstimatorBuilder.withTripRequest(tripRequest).build();
         });
         assertEquals("Start city is invalid", exception.getMessage());
     }
 
     @Test
     void estimateTrainsWithNoArrivalCity_ShouldThrowException() {
-        TripRequest request = new TripRequestBuilder()
+        TripRequest tripRequest = new TripRequestBuilder()
                 .withDetails(new TripDetailsBuilder()
                         .from("Bordeaux")
                         .to("")
@@ -63,7 +64,7 @@ FakeBasePriceRepository fakeBasePriceRepository;
                 .build();
 
         InvalidTripInputException exception = assertThrows(InvalidTripInputException.class, () -> {
-            trainEstimator.estimate(request);
+            trainEstimatorBuilder.withTripRequest(tripRequest).build();
         });
         assertEquals("Destination city is invalid", exception.getMessage());
 
@@ -73,7 +74,7 @@ FakeBasePriceRepository fakeBasePriceRepository;
     @Test
     void estimateTrainsWithInvalidDate_ShouldThrowException() {
         Date yesterday = new Date(System.currentTimeMillis() - 24 * 60 * 60 * 1000);
-        TripRequest request = new TripRequestBuilder()
+        TripRequest tripRequest = new TripRequestBuilder()
                 .withDetails(new TripDetailsBuilder()
                         .from("Bordeaux")
                         .to("Paris")
@@ -84,14 +85,14 @@ FakeBasePriceRepository fakeBasePriceRepository;
                 .build();
 
         InvalidTripInputException exception = assertThrows(InvalidTripInputException.class, () -> {
-            trainEstimator.estimate(request);
+            trainEstimatorBuilder.withTripRequest(tripRequest).build();
         });
         assertEquals("Date is invalid", exception.getMessage());
     }
 
     @Test
     void estimateTrainsWithInvalidAge_ShouldThrowException() {
-        TripRequest request = new TripRequestBuilder()
+        TripRequest tripRequest = new TripRequestBuilder()
                 .withDetails(new TripDetailsBuilder()
                         .from("Bordeaux")
                         .to("Paris")
@@ -101,8 +102,9 @@ FakeBasePriceRepository fakeBasePriceRepository;
                         .build())
                 .build();
 
+
         InvalidTripInputException exception = assertThrows(InvalidTripInputException.class, () -> {
-            trainEstimator.estimate(request);
+            trainEstimatorBuilder.withTripRequest(tripRequest).build();
         });
         assertEquals("Age is invalid", exception.getMessage());
     }
@@ -110,7 +112,7 @@ FakeBasePriceRepository fakeBasePriceRepository;
     //TODO BUG Détécté sur les enfants à corriger une fois les tests en place
 //    @Test
 //    void estimateTrainsWithAge_ShouldThrowException() {
-//        TripRequest request = new TripRequestBuilder()
+//        new TripRequestBuilder()
 //                .withDetails(new TripDetailsBuilder()
 //                        .from("Bordeaux")
 //                        .to("Paris")
@@ -121,7 +123,7 @@ FakeBasePriceRepository fakeBasePriceRepository;
 //                .build();
 //
 //        TrainTicketEstimatorStub trainEstimator = new TrainTicketEstimatorStub();
-//        assertEquals(0, trainEstimator.estimate(request));
+//        assertEquals(0, trainEstimator.estimate());
 //    }
     @Test
     void BasePriceWithAge0_ShouldReturn0e() {
@@ -130,7 +132,7 @@ FakeBasePriceRepository fakeBasePriceRepository;
                 .age(0)
                 .build();
 
-        assertEquals(0, trainEstimator.getBasePriceBasedOnAge(passenger, basePrice));
+        assertEquals(0, passenger.getBasePriceBasedOnAge(basePrice));
     }
     @Test
     void BasePriceWithAge2_ShouldReturn() {
@@ -139,7 +141,7 @@ FakeBasePriceRepository fakeBasePriceRepository;
                 .age(2)
                 .build();
 
-        assertEquals(9, trainEstimator.getBasePriceBasedOnAge(passenger, basePrice));
+        assertEquals(9, passenger.getBasePriceBasedOnAge(basePrice));
     }
 
     @Test
@@ -149,7 +151,7 @@ FakeBasePriceRepository fakeBasePriceRepository;
                 .age(15)
                 .build();
 
-        assertEquals(60, trainEstimator.getBasePriceBasedOnAge(passenger, basePrice));
+        assertEquals(60, passenger.getBasePriceBasedOnAge(basePrice));
     }
 
     @Test
@@ -159,7 +161,7 @@ FakeBasePriceRepository fakeBasePriceRepository;
                 .age(37)
                 .build();
 
-        assertEquals(120, trainEstimator.getBasePriceBasedOnAge(passenger, basePrice));
+        assertEquals(120, passenger.getBasePriceBasedOnAge(basePrice));
     }
 
     @Test
@@ -170,7 +172,7 @@ FakeBasePriceRepository fakeBasePriceRepository;
                 .withOutDiscount()
                 .build();
 
-        assertEquals(80, trainEstimator.getBasePriceBasedOnAge(passenger, basePrice));
+        assertEquals(80, passenger.getBasePriceBasedOnAge(basePrice));
     }
 
     @Test
@@ -181,7 +183,7 @@ FakeBasePriceRepository fakeBasePriceRepository;
                 .age(71)
                 .build();
 
-        assertEquals(60, trainEstimator.getBasePriceBasedOnAge(passenger, basePrice));
+       assertEquals(60, passenger.getBasePriceBasedOnAge(basePrice));
     }
 
     @Test
@@ -190,7 +192,7 @@ FakeBasePriceRepository fakeBasePriceRepository;
         double priceModified = 120;
         Date in31Days = new Date(System.currentTimeMillis() + 31L * 24 * 60 * 60 * 1000);
 
-        TripRequest request = new TripRequestBuilder()
+        TripRequest tripRequest = new TripRequestBuilder()
                 .withDetails(new TripDetailsBuilder()
                         .from("Bordeaux")
                         .to("Paris")
@@ -200,8 +202,9 @@ FakeBasePriceRepository fakeBasePriceRepository;
                         .age(30)
                         .build())
                 .build();
+        TrainTicketEstimator estimator = trainEstimatorBuilder.withTripRequest(tripRequest).build();
 
-        assertEquals(100, trainEstimator.changesBasePriceDependingOnDate(request, priceModified, basePrice));
+        assertEquals(100, estimator.changesBasePriceDependingOnDate(tripRequest, priceModified, basePrice));
     }
 
     @Test
@@ -210,7 +213,7 @@ FakeBasePriceRepository fakeBasePriceRepository;
         double priceModified = 120;
         Date tomorrow = new Date(System.currentTimeMillis() + 24 * 60 * 60 * 1000);
 
-        TripRequest request = new TripRequestBuilder()
+        TripRequest tripRequest = new TripRequestBuilder()
                 .withDetails(new TripDetailsBuilder()
                         .from("Bordeaux")
                         .to("Paris")
@@ -221,7 +224,9 @@ FakeBasePriceRepository fakeBasePriceRepository;
                         .build())
                 .build();
 
-        assertEquals(220, trainEstimator.changesBasePriceDependingOnDate(request, priceModified, basePrice));
+        TrainTicketEstimator estimator = trainEstimatorBuilder.withTripRequest(tripRequest).build();
+
+        assertEquals(220, estimator.changesBasePriceDependingOnDate(tripRequest, priceModified, basePrice));
     }
 
     @Test
@@ -230,7 +235,7 @@ FakeBasePriceRepository fakeBasePriceRepository;
         double priceModified = 120;
         Date In5Days = new Date(System.currentTimeMillis() + 5 * 24 * 60 * 60 * 1000);
 
-        TripRequest request = new TripRequestBuilder()
+        TripRequest tripRequest = new TripRequestBuilder()
                 .withDetails(new TripDetailsBuilder()
                         .from("Bordeaux")
                         .to("Paris")
@@ -241,7 +246,9 @@ FakeBasePriceRepository fakeBasePriceRepository;
                         .build())
                 .build();
 
-        assertEquals(220, trainEstimator.changesBasePriceDependingOnDate(request, priceModified, basePrice));
+        TrainTicketEstimator estimator = trainEstimatorBuilder.withTripRequest(tripRequest).build();
+
+        assertEquals(220, estimator.changesBasePriceDependingOnDate(tripRequest, priceModified, basePrice));
     }
 
     @Test
@@ -250,7 +257,7 @@ FakeBasePriceRepository fakeBasePriceRepository;
         double priceModified = 120;
         Date in10Days = new Date(System.currentTimeMillis() + 10 * 24 * 60 * 60 * 1000);
 
-        TripRequest request = new TripRequestBuilder()
+        TripRequest tripRequest = new TripRequestBuilder()
                 .withDetails(new TripDetailsBuilder()
                         .from("Bordeaux")
                         .to("Paris")
@@ -260,13 +267,14 @@ FakeBasePriceRepository fakeBasePriceRepository;
                         .age(30)
                         .build())
                 .build();
+        TrainTicketEstimator estimator = trainEstimatorBuilder.withTripRequest(tripRequest).build();
 
-        assertEquals(140, trainEstimator.changesBasePriceDependingOnDate(request, priceModified, basePrice));
+        assertEquals(140, estimator.changesBasePriceDependingOnDate(tripRequest, priceModified, basePrice));
     }
 
     @Test
     void estimateTrainsWithCoupleAndDiscountCardCouple() {
-        TripRequest request = new TripRequestBuilder()
+        TripRequest tripRequest = new TripRequestBuilder()
                 .withDetails(new TripDetailsBuilder()
                         .from("Bordeaux")
                         .to("Paris")
@@ -282,13 +290,14 @@ FakeBasePriceRepository fakeBasePriceRepository;
                 .build();
 
         fakeBasePriceRepository.setBasePrice(100);
+        TrainTicketEstimator estimator = trainEstimatorBuilder.withTripRequest(tripRequest).build();
 
-        assertEquals(400, trainEstimator.estimate(request));
+        assertEquals(400, estimator.estimate());
     }
 
     @Test
     void estimateTrainsWithCoupleMinorAndDiscountCardCouple() {
-        TripRequest request = new TripRequestBuilder()
+        TripRequest tripRequest = new TripRequestBuilder()
                 .withDetails(new TripDetailsBuilder()
                         .from("Bordeaux")
                         .to("Paris")
@@ -304,13 +313,14 @@ FakeBasePriceRepository fakeBasePriceRepository;
                 .build();
 
         fakeBasePriceRepository.setBasePrice(100);
+        TrainTicketEstimator estimator = trainEstimatorBuilder.withTripRequest(tripRequest).build();
 
-        assertEquals(320, trainEstimator.estimate(request));
+        assertEquals(320, estimator.estimate());
     }
 
     @Test
     void estimateTrainsWithCoupleAndNoDiscount() {
-        TripRequest request = new TripRequestBuilder()
+        TripRequest tripRequest = new TripRequestBuilder()
                 .withDetails(new TripDetailsBuilder()
                         .from("Bordeaux")
                         .to("Paris")
@@ -326,13 +336,14 @@ FakeBasePriceRepository fakeBasePriceRepository;
                 .build();
 
         fakeBasePriceRepository.setBasePrice(100);
+        TrainTicketEstimator estimator = trainEstimatorBuilder.withTripRequest(tripRequest).build();
 
-        assertEquals(440, trainEstimator.estimate(request));
+        assertEquals(440, estimator.estimate());
     }
 
     @Test
     void estimateTrainsWithNoCoupleAndDiscountCardHalfCouple() {
-        TripRequest request = new TripRequestBuilder()
+        TripRequest tripRequest = new TripRequestBuilder()
                 .withDetails(new TripDetailsBuilder()
                         .from("Bordeaux")
                         .to("Paris")
@@ -344,12 +355,14 @@ FakeBasePriceRepository fakeBasePriceRepository;
                 .build();
 
         fakeBasePriceRepository.setBasePrice(100);
+        TrainTicketEstimator estimator = trainEstimatorBuilder.withTripRequest(tripRequest).build();
 
-        assertEquals(210, trainEstimator.estimate(request));
+
+        assertEquals(210, estimator.estimate());
     }
     @Test
     void estimateTrainsWithNoCoupleAndNoDiscount() {
-        TripRequest request = new TripRequestBuilder()
+        TripRequest tripRequest = new TripRequestBuilder()
                 .withDetails(new TripDetailsBuilder()
                         .from("Bordeaux")
                         .to("Paris")
@@ -361,12 +374,13 @@ FakeBasePriceRepository fakeBasePriceRepository;
                 .build();
 
         fakeBasePriceRepository.setBasePrice(100);
+        TrainTicketEstimator estimator = trainEstimatorBuilder.withTripRequest(tripRequest).build();
 
-        assertEquals(220, trainEstimator.estimate(request));
+        assertEquals(220, estimator.estimate());
     }
     @Test
     void estimateTrainsWithNoCoupleMinorAndDiscountCardHalfCouple() {
-        TripRequest request = new TripRequestBuilder()
+        TripRequest tripRequest = new TripRequestBuilder()
                 .withDetails(new TripDetailsBuilder()
                         .from("Bordeaux")
                         .to("Paris")
@@ -378,12 +392,13 @@ FakeBasePriceRepository fakeBasePriceRepository;
                 .build();
 
         fakeBasePriceRepository.setBasePrice(100);
+        TrainTicketEstimator estimator = trainEstimatorBuilder.withTripRequest(tripRequest).build();
 
-        assertEquals(160, trainEstimator.estimate(request));
+        assertEquals(160, estimator.estimate());
     }
     @Test
     void estimateTrainsWithDiscountCardTrainStroke() {
-        TripRequest request = new TripRequestBuilder()
+        TripRequest tripRequest = new TripRequestBuilder()
                 .withDetails(new TripDetailsBuilder()
                         .from("Bordeaux")
                         .to("Paris")
@@ -395,7 +410,8 @@ FakeBasePriceRepository fakeBasePriceRepository;
                 .build();
 
         fakeBasePriceRepository.setBasePrice(100);
+        TrainTicketEstimator estimator = trainEstimatorBuilder.withTripRequest(tripRequest).build();
 
-        assertEquals(1, trainEstimator.estimate(request));
+        assertEquals(1, estimator.estimate());
     }
 }

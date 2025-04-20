@@ -1,5 +1,6 @@
 package org.katas;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.katas.model.DiscountCard;
 import org.katas.model.Passenger;
@@ -11,8 +12,16 @@ import java.util.Date;
 import static org.junit.jupiter.api.Assertions.*;
 class TrainTicketEstimatorTest {
 
+TrainTicketEstimator trainEstimator;
+FakeBasePriceRepository fakeBasePriceRepository;
+    @BeforeEach
+    public void setUp() {
+        fakeBasePriceRepository = new FakeBasePriceRepository();
+        trainEstimator = new TrainTicketEstimator(fakeBasePriceRepository);
+    }
+
     @Test
-    void estimateTrainsWithoutNoPassager_ShouldReturn0() {
+    void estimateTrainsWithoutNoPassenger_ShouldReturn0() {
         TripRequest request = new TripRequestBuilder()
                 .withDetails(new TripDetailsBuilder()
                         .from("")
@@ -22,7 +31,6 @@ class TrainTicketEstimatorTest {
                 .withNoPassenger()
                 .build();
 
-        TrainTicketEstimator trainEstimator = new TrainTicketEstimator();
         assertEquals(0, trainEstimator.estimate(request));
     }
 
@@ -37,7 +45,6 @@ class TrainTicketEstimatorTest {
                         .build())
                 .build();
 
-        TrainTicketEstimator trainEstimator = new TrainTicketEstimator();
         InvalidTripInputException exception = assertThrows(InvalidTripInputException.class, () -> {
             trainEstimator.estimate(request);
         });
@@ -55,7 +62,6 @@ class TrainTicketEstimatorTest {
                         .build())
                 .build();
 
-        TrainTicketEstimator trainEstimator = new TrainTicketEstimator();
         InvalidTripInputException exception = assertThrows(InvalidTripInputException.class, () -> {
             trainEstimator.estimate(request);
         });
@@ -77,7 +83,6 @@ class TrainTicketEstimatorTest {
                         .build())
                 .build();
 
-        TrainTicketEstimator trainEstimator = new TrainTicketEstimator();
         InvalidTripInputException exception = assertThrows(InvalidTripInputException.class, () -> {
             trainEstimator.estimate(request);
         });
@@ -96,7 +101,6 @@ class TrainTicketEstimatorTest {
                         .build())
                 .build();
 
-        TrainTicketEstimatorStub trainEstimator = new TrainTicketEstimatorStub();
         InvalidTripInputException exception = assertThrows(InvalidTripInputException.class, () -> {
             trainEstimator.estimate(request);
         });
@@ -126,7 +130,6 @@ class TrainTicketEstimatorTest {
                 .age(0)
                 .build();
 
-        TrainTicketEstimatorStub trainEstimator = new TrainTicketEstimatorStub();
         assertEquals(0, trainEstimator.getBasePriceBasedOnAge(passenger, basePrice));
     }
     @Test
@@ -136,7 +139,6 @@ class TrainTicketEstimatorTest {
                 .age(2)
                 .build();
 
-        TrainTicketEstimatorStub trainEstimator = new TrainTicketEstimatorStub();
         assertEquals(9, trainEstimator.getBasePriceBasedOnAge(passenger, basePrice));
     }
 
@@ -147,7 +149,6 @@ class TrainTicketEstimatorTest {
                 .age(15)
                 .build();
 
-        TrainTicketEstimatorStub trainEstimator = new TrainTicketEstimatorStub();
         assertEquals(60, trainEstimator.getBasePriceBasedOnAge(passenger, basePrice));
     }
 
@@ -158,7 +159,6 @@ class TrainTicketEstimatorTest {
                 .age(37)
                 .build();
 
-        TrainTicketEstimatorStub trainEstimator = new TrainTicketEstimatorStub();
         assertEquals(120, trainEstimator.getBasePriceBasedOnAge(passenger, basePrice));
     }
 
@@ -170,7 +170,6 @@ class TrainTicketEstimatorTest {
                 .withOutDiscount()
                 .build();
 
-        TrainTicketEstimatorStub trainEstimator = new TrainTicketEstimatorStub();
         assertEquals(80, trainEstimator.getBasePriceBasedOnAge(passenger, basePrice));
     }
 
@@ -182,7 +181,6 @@ class TrainTicketEstimatorTest {
                 .age(71)
                 .build();
 
-        TrainTicketEstimatorStub trainEstimator = new TrainTicketEstimatorStub();
         assertEquals(60, trainEstimator.getBasePriceBasedOnAge(passenger, basePrice));
     }
 
@@ -203,7 +201,6 @@ class TrainTicketEstimatorTest {
                         .build())
                 .build();
 
-        TrainTicketEstimatorStub trainEstimator = new TrainTicketEstimatorStub();
         assertEquals(100, trainEstimator.changesBasePriceDependingOnDate(request, priceModified, basePrice));
     }
 
@@ -224,7 +221,6 @@ class TrainTicketEstimatorTest {
                         .build())
                 .build();
 
-        TrainTicketEstimatorStub trainEstimator = new TrainTicketEstimatorStub();
         assertEquals(220, trainEstimator.changesBasePriceDependingOnDate(request, priceModified, basePrice));
     }
 
@@ -245,7 +241,6 @@ class TrainTicketEstimatorTest {
                         .build())
                 .build();
 
-        TrainTicketEstimatorStub trainEstimator = new TrainTicketEstimatorStub();
         assertEquals(220, trainEstimator.changesBasePriceDependingOnDate(request, priceModified, basePrice));
     }
 
@@ -266,7 +261,6 @@ class TrainTicketEstimatorTest {
                         .build())
                 .build();
 
-        TrainTicketEstimatorStub trainEstimator = new TrainTicketEstimatorStub();
         assertEquals(140, trainEstimator.changesBasePriceDependingOnDate(request, priceModified, basePrice));
     }
 
@@ -287,10 +281,31 @@ class TrainTicketEstimatorTest {
                         .build())
                 .build();
 
-        TrainTicketEstimatorStub trainEstimator = new TrainTicketEstimatorStub();
-        trainEstimator.setBasePrice(100);
+        fakeBasePriceRepository.setBasePrice(100);
 
         assertEquals(400, trainEstimator.estimate(request));
+    }
+
+    @Test
+    void estimateTrainsWithCoupleMinorAndDiscountCardCouple() {
+        TripRequest request = new TripRequestBuilder()
+                .withDetails(new TripDetailsBuilder()
+                        .from("Bordeaux")
+                        .to("Paris")
+                        .build())
+                .withPassenger(new PassengerBuilder()
+                        .age(15)
+                        .withDiscount(DiscountCard.Couple)
+                        .build())
+                .withPassenger(new PassengerBuilder()
+                        .age(15)
+                        .withDiscount(DiscountCard.Couple)
+                        .build())
+                .build();
+
+        fakeBasePriceRepository.setBasePrice(100);
+
+        assertEquals(320, trainEstimator.estimate(request));
     }
 
     @Test
@@ -310,8 +325,7 @@ class TrainTicketEstimatorTest {
                         .build())
                 .build();
 
-        TrainTicketEstimatorStub trainEstimator = new TrainTicketEstimatorStub();
-        trainEstimator.setBasePrice(100);
+        fakeBasePriceRepository.setBasePrice(100);
 
         assertEquals(440, trainEstimator.estimate(request));
     }
@@ -329,8 +343,7 @@ class TrainTicketEstimatorTest {
                         .build())
                 .build();
 
-        TrainTicketEstimatorStub trainEstimator = new TrainTicketEstimatorStub();
-        trainEstimator.setBasePrice(100);
+        fakeBasePriceRepository.setBasePrice(100);
 
         assertEquals(210, trainEstimator.estimate(request));
     }
@@ -347,10 +360,26 @@ class TrainTicketEstimatorTest {
                         .build())
                 .build();
 
-        TrainTicketEstimatorStub trainEstimator = new TrainTicketEstimatorStub();
-        trainEstimator.setBasePrice(100);
+        fakeBasePriceRepository.setBasePrice(100);
 
         assertEquals(220, trainEstimator.estimate(request));
+    }
+    @Test
+    void estimateTrainsWithNoCoupleMinorAndDiscountCardHalfCouple() {
+        TripRequest request = new TripRequestBuilder()
+                .withDetails(new TripDetailsBuilder()
+                        .from("Bordeaux")
+                        .to("Paris")
+                        .build())
+                .withPassenger(new PassengerBuilder()
+                        .age(15)
+                        .withDiscount(DiscountCard.HalfCouple)
+                        .build())
+                .build();
+
+        fakeBasePriceRepository.setBasePrice(100);
+
+        assertEquals(160, trainEstimator.estimate(request));
     }
     @Test
     void estimateTrainsWithDiscountCardTrainStroke() {
@@ -365,8 +394,7 @@ class TrainTicketEstimatorTest {
                         .build())
                 .build();
 
-        TrainTicketEstimatorStub trainEstimator = new TrainTicketEstimatorStub();
-        trainEstimator.setBasePrice(100);
+        fakeBasePriceRepository.setBasePrice(100);
 
         assertEquals(1, trainEstimator.estimate(request));
     }

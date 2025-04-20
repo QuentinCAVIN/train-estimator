@@ -1,20 +1,21 @@
 package org.katas;
 
-import org.json.JSONObject;
 import org.katas.model.DiscountCard;
 import org.katas.model.Passenger;
 import org.katas.model.TripRequest;
-import org.katas.model.exceptions.ApiException;
 import org.katas.model.exceptions.InvalidTripInputException;
-
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
-import java.net.HttpURLConnection;
-import java.net.URL;
+import org.katas.repository.IBasePriceRepository;
 import java.util.Date;
 import java.util.List;
 
 public class TrainTicketEstimator {
+
+    IBasePriceRepository basePriceRepository;
+
+    public TrainTicketEstimator(IBasePriceRepository basePriceRepository) {
+        this.basePriceRepository = basePriceRepository;
+    }
+
     // Si aucun passager, le prix est 0
     public double estimate(TripRequest trainDetails) {
         if (trainDetails.passengers().isEmpty()) {
@@ -35,7 +36,7 @@ public class TrainTicketEstimator {
         }
 
         // Appel à l’API pour obtenir le prix de base du trajet
-        double basePrice = getBasePrice(trainDetails);
+        double basePrice = basePriceRepository.getBasePrice(trainDetails);
 
         // Liste des passagers
         List<Passenger> passengers = trainDetails.passengers();
@@ -135,7 +136,7 @@ public class TrainTicketEstimator {
         // Tarification selon l'âge
         if (age < 1) {
             temp = 0;
-        } else if (age > 0 && age < 4){
+        } else if (age < 4){
             temp = 9;
         } else if (age <= 17) {
             temp = basePrice * 0.6;
@@ -148,38 +149,5 @@ public class TrainTicketEstimator {
             temp = basePrice * 1.2;
         }
         return temp;
-    }
-
-    // On inclu (et on ne teste pas) l'ApiExcpetion Fréd et Eric sont ok avec ça
-    protected double getBasePrice(TripRequest trainDetails) {
-        double basePrice;
-        try {
-            // Connexion HTTP en GET
-            String urlString = String.format("https://sncftrenitaliadb.com/api/train/estimate/price?from=%s&to=%s&date=%s", trainDetails.details().from(), trainDetails.details().to(), trainDetails.details().when());
-            URL url = new URL(urlString);
-            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-            conn.setRequestMethod("GET");
-
-            // Lecture de la réponse
-            BufferedReader in = new BufferedReader(new InputStreamReader(conn.getInputStream()));
-            String inputLine;
-            StringBuffer content = new StringBuffer();
-            while ((inputLine = in.readLine()) != null) {
-                content.append(inputLine);
-            }
-            in.close();
-            conn.disconnect();
-
-            // Parsing JSON pour récupérer le prix
-            JSONObject obj = new JSONObject(content.toString());
-            basePrice = obj.has("price") ? obj.getDouble("price") : -1;
-        } catch (Exception e) {
-            basePrice = -1;
-        }
-
-        if (basePrice == -1) {
-            throw new ApiException();
-        }
-        return basePrice;
     }
 }

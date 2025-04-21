@@ -36,14 +36,21 @@ public class TrainTicketEstimator {
             // Appel méthode de calcul du prix en fonction de la date de départ
             modifiedPrice = trainDetails.details().applyingDateModifierOnPrice(modifiedPrice, basePrice);
 
+
             // Réduction spéciale carte TrainStroke
             if (passenger.discounts().contains(DiscountCard.TrainStroke)) {
                 modifiedPrice = 1;
+            }
+            if (passenger.discounts().contains(DiscountCard.Senior)) {
+                modifiedPrice -= basePrice * 0.2;
             }
 
             // Ajout au total et réinitialisation
             total += modifiedPrice;
         }
+
+
+
 
         // Réduction couple (2 passagers adultes avec carte Couple)
         if (trainDetails.isEligibleCouple()) {

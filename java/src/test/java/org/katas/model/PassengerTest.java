@@ -65,6 +65,6 @@ public class PassengerTest {
                 .age(71)
                 .build();
 
-        assertEquals(60, passenger.applyingAgeModifierOnPrice(basePrice));
+        assertEquals(80, passenger.applyingAgeModifierOnPrice(basePrice));
     }
 }

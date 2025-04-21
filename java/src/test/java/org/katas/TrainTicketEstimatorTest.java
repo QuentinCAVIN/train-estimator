@@ -39,6 +39,8 @@ FakeBasePriceRepository fakeBasePriceRepository;
         assertEquals("No passenger", exception.getMessage());
     }
 
+    Date in31Days = new Date(System.currentTimeMillis() + 31L * 24 * 60 * 60 * 1000);
+
     @Test
     void estimateTrainsWithNoDepartureCity_ShouldThrowException() {
         TripRequest tripRequest = new TripRequestBuilder()
@@ -210,12 +212,17 @@ FakeBasePriceRepository fakeBasePriceRepository;
         assertEquals(140, tripRequest.details().applyingDateModifierOnPrice(priceModified, basePrice));
     }
 
+    //////// DISCOUNT TEST CI DESSOUS
+    ///
+    ///
+    ///
     @Test
     void estimateTrainsWithCoupleAndDiscountCardCouple() {
         TripRequest tripRequest = new TripRequestBuilder()
                 .withDetails(new TripDetailsBuilder()
                         .from("Bordeaux")
                         .to("Paris")
+                        .when(in31Days)
                         .build())
                 .withPassenger(new PassengerBuilder()
                         .age(36)
@@ -224,108 +231,6 @@ FakeBasePriceRepository fakeBasePriceRepository;
                 .withPassenger(new PassengerBuilder()
                         .age(39)
                         .withDiscount(DiscountCard.Couple)
-                        .build())
-                .build();
-
-        fakeBasePriceRepository.setBasePrice(100);
-        TrainTicketEstimator estimator = trainEstimatorBuilder.withTripRequest(tripRequest).build();
-
-        assertEquals(400, estimator.estimate());
-    }
-
-    @Test
-    void estimateTrainsWithCoupleMinorAndDiscountCardCouple() {
-        TripRequest tripRequest = new TripRequestBuilder()
-                .withDetails(new TripDetailsBuilder()
-                        .from("Bordeaux")
-                        .to("Paris")
-                        .build())
-                .withPassenger(new PassengerBuilder()
-                        .age(15)
-                        .withDiscount(DiscountCard.Couple)
-                        .build())
-                .withPassenger(new PassengerBuilder()
-                        .age(15)
-                        .withDiscount(DiscountCard.Couple)
-                        .build())
-                .build();
-
-        fakeBasePriceRepository.setBasePrice(100);
-        TrainTicketEstimator estimator = trainEstimatorBuilder.withTripRequest(tripRequest).build();
-
-        assertEquals(320, estimator.estimate());
-    }
-
-    @Test
-    void estimateTrainsWithCoupleAndNoDiscount() {
-        TripRequest tripRequest = new TripRequestBuilder()
-                .withDetails(new TripDetailsBuilder()
-                        .from("Bordeaux")
-                        .to("Paris")
-                        .build())
-                .withPassenger(new PassengerBuilder()
-                        .age(36)
-                        .withOutDiscount()
-                        .build())
-                .withPassenger(new PassengerBuilder()
-                        .age(39)
-                        .withOutDiscount()
-                        .build())
-                .build();
-
-        fakeBasePriceRepository.setBasePrice(100);
-        TrainTicketEstimator estimator = trainEstimatorBuilder.withTripRequest(tripRequest).build();
-
-        assertEquals(440, estimator.estimate());
-    }
-
-    @Test
-    void estimateTrainsWithNoCoupleAndDiscountCardHalfCouple() {
-        TripRequest tripRequest = new TripRequestBuilder()
-                .withDetails(new TripDetailsBuilder()
-                        .from("Bordeaux")
-                        .to("Paris")
-                        .build())
-                .withPassenger(new PassengerBuilder()
-                        .age(36)
-                        .withDiscount(DiscountCard.HalfCouple)
-                        .build())
-                .build();
-
-        fakeBasePriceRepository.setBasePrice(100);
-        TrainTicketEstimator estimator = trainEstimatorBuilder.withTripRequest(tripRequest).build();
-
-
-        assertEquals(210, estimator.estimate());
-    }
-    @Test
-    void estimateTrainsWithNoCoupleAndNoDiscount() {
-        TripRequest tripRequest = new TripRequestBuilder()
-                .withDetails(new TripDetailsBuilder()
-                        .from("Bordeaux")
-                        .to("Paris")
-                        .build())
-                .withPassenger(new PassengerBuilder()
-                        .age(36)
-                        .withOutDiscount()
-                        .build())
-                .build();
-
-        fakeBasePriceRepository.setBasePrice(100);
-        TrainTicketEstimator estimator = trainEstimatorBuilder.withTripRequest(tripRequest).build();
-
-        assertEquals(220, estimator.estimate());
-    }
-    @Test
-    void estimateTrainsWithNoCoupleMinorAndDiscountCardHalfCouple() {
-        TripRequest tripRequest = new TripRequestBuilder()
-                .withDetails(new TripDetailsBuilder()
-                        .from("Bordeaux")
-                        .to("Paris")
-                        .build())
-                .withPassenger(new PassengerBuilder()
-                        .age(15)
-                        .withDiscount(DiscountCard.HalfCouple)
                         .build())
                 .build();
 
@@ -334,12 +239,120 @@ FakeBasePriceRepository fakeBasePriceRepository;
 
         assertEquals(160, estimator.estimate());
     }
+
+    @Test
+    void estimateTrainsWithCoupleMinorAndDiscountCardCouple() {
+        TripRequest tripRequest = new TripRequestBuilder()
+                .withDetails(new TripDetailsBuilder()
+                        .from("Bordeaux")
+                        .to("Paris")
+                        .when(in31Days)
+                        .build())
+                .withPassenger(new PassengerBuilder()
+                        .age(15)
+                        .withDiscount(DiscountCard.Couple)
+                        .build())
+                .withPassenger(new PassengerBuilder()
+                        .age(15)
+                        .withDiscount(DiscountCard.Couple)
+                        .build())
+                .build();
+
+        fakeBasePriceRepository.setBasePrice(100);
+        TrainTicketEstimator estimator = trainEstimatorBuilder.withTripRequest(tripRequest).build();
+
+        assertEquals(80, estimator.estimate());
+    }
+
+    @Test
+    void estimateTrainsWithCoupleAndNoDiscount() {
+        TripRequest tripRequest = new TripRequestBuilder()
+                .withDetails(new TripDetailsBuilder()
+                        .from("Bordeaux")
+                        .to("Paris")
+                        .when(in31Days)
+                        .build())
+                .withPassenger(new PassengerBuilder()
+                        .age(36)
+                        .withOutDiscount()
+                        .build())
+                .withPassenger(new PassengerBuilder()
+                        .age(39)
+                        .withOutDiscount()
+                        .build())
+                .build();
+
+        fakeBasePriceRepository.setBasePrice(100);
+        TrainTicketEstimator estimator = trainEstimatorBuilder.withTripRequest(tripRequest).build();
+
+        assertEquals(200, estimator.estimate());
+    }
+
+    @Test
+    void estimateTrainsWithNoCoupleAndDiscountCardHalfCouple() {
+        TripRequest tripRequest = new TripRequestBuilder()
+                .withDetails(new TripDetailsBuilder()
+                        .from("Bordeaux")
+                        .to("Paris")
+                        .when(in31Days)
+                        .build())
+                .withPassenger(new PassengerBuilder()
+                        .age(36)
+                        .withDiscount(DiscountCard.HalfCouple)
+                        .build())
+                .build();
+
+        fakeBasePriceRepository.setBasePrice(100);
+        TrainTicketEstimator estimator = trainEstimatorBuilder.withTripRequest(tripRequest).build();
+
+
+        assertEquals(90, estimator.estimate());
+    }
+    @Test
+    void estimateTrainsWithNoCoupleAndNoDiscount() {
+        TripRequest tripRequest = new TripRequestBuilder()
+                .withDetails(new TripDetailsBuilder()
+                        .from("Bordeaux")
+                        .to("Paris")
+                        .when(in31Days)
+                        .build())
+                .withPassenger(new PassengerBuilder()
+                        .age(36)
+                        .withOutDiscount()
+                        .build())
+                .build();
+
+        fakeBasePriceRepository.setBasePrice(100);
+        TrainTicketEstimator estimator = trainEstimatorBuilder.withTripRequest(tripRequest).build();
+
+        assertEquals(100, estimator.estimate());
+    }
+    @Test
+    void estimateTrainsWithNoCoupleMinorAndDiscountCardHalfCouple() {
+        TripRequest tripRequest = new TripRequestBuilder()
+                .withDetails(new TripDetailsBuilder()
+                        .from("Bordeaux")
+                        .to("Paris")
+                        .when(in31Days)
+                        .build())
+                .withPassenger(new PassengerBuilder()
+                        .age(15)
+                        .withDiscount(DiscountCard.HalfCouple)
+                        .build())
+                .build();
+
+        fakeBasePriceRepository.setBasePrice(100);
+        TrainTicketEstimator estimator = trainEstimatorBuilder.withTripRequest(tripRequest).build();
+
+        assertEquals(40, estimator.estimate());
+    }
     @Test
     void estimateTrainsWithDiscountCardTrainStroke() {
         TripRequest tripRequest = new TripRequestBuilder()
                 .withDetails(new TripDetailsBuilder()
                         .from("Bordeaux")
                         .to("Paris")
+                        .when(in31Days)
                         .build())
                 .withPassenger(new PassengerBuilder()
                         .age(36)
@@ -351,5 +364,152 @@ FakeBasePriceRepository fakeBasePriceRepository;
         TrainTicketEstimator estimator = trainEstimatorBuilder.withTripRequest(tripRequest).build();
 
         assertEquals(1, estimator.estimate());
+    }
+
+    @Test
+    void estimateTrainsWithDiscountCardTrainStrokeAndCouple() {
+        TripRequest tripRequest = new TripRequestBuilder()
+                .withDetails(new TripDetailsBuilder()
+                        .from("Bordeaux")
+                        .to("Paris")
+                        .when(in31Days)
+                        .build())
+                .withPassenger(new PassengerBuilder()
+                        .age(36)
+                        .withDiscount(DiscountCard.TrainStroke)
+                        .build())
+                .withPassenger(new PassengerBuilder()
+                        .age(36)
+                        .withDiscount(DiscountCard.Couple)
+                        .build())
+                .build();
+
+        fakeBasePriceRepository.setBasePrice(100);
+        TrainTicketEstimator estimator = trainEstimatorBuilder.withTripRequest(tripRequest).build();
+
+        assertEquals(61, estimator.estimate());
+    }
+
+    @Test
+    void estimateTrainsWithDiscountCard1SeniorAndCouple() {
+        TripRequest tripRequest = new TripRequestBuilder()
+                .withDetails(new TripDetailsBuilder()
+                        .from("Bordeaux")
+                        .to("Paris")
+                        .when(in31Days)
+                        .build())
+                .withPassenger(new PassengerBuilder()
+                        .age(65)
+                        .withDiscount(DiscountCard.Couple)
+                        .build())
+                .withPassenger(new PassengerBuilder()
+                        .age(80)
+                        .withDiscount(DiscountCard.Senior)
+                        .withDiscount(DiscountCard.Couple)
+                        .build())
+                .build();
+
+        fakeBasePriceRepository.setBasePrice(100);
+        TrainTicketEstimator estimator = trainEstimatorBuilder.withTripRequest(tripRequest).build();
+
+        assertEquals(100, estimator.estimate());
+    }
+
+    @Test
+    void estimateTrainsWithDiscountCard2SeniorAndCouple() {
+        TripRequest tripRequest = new TripRequestBuilder()
+                .withDetails(new TripDetailsBuilder()
+                        .from("Bordeaux")
+                        .to("Paris")
+                        .when(in31Days)
+                        .build())
+                .withPassenger(new PassengerBuilder()
+                        .age(81)
+                        .withDiscount(DiscountCard.Senior)
+                        .withDiscount(DiscountCard.Couple)
+                        .build())
+                .withPassenger(new PassengerBuilder()
+                        .age(80)
+                        .withDiscount(DiscountCard.Senior)
+                        .withDiscount(DiscountCard.Couple)
+                        .build())
+                .build();
+
+        fakeBasePriceRepository.setBasePrice(100);
+        TrainTicketEstimator estimator = trainEstimatorBuilder.withTripRequest(tripRequest).build();
+
+        assertEquals(40, estimator.estimate());
+    }
+
+    @Test
+    void estimateTrainsWithDiscountCardCoupleAnd3Passengers() {
+        TripRequest tripRequest = new TripRequestBuilder()
+                .withDetails(new TripDetailsBuilder()
+                        .from("Bordeaux")
+                        .to("Paris")
+                        .when(in31Days)
+                        .build())
+                .withPassenger(new PassengerBuilder()
+                        .age(50)
+                        .withDiscount(DiscountCard.Couple)
+                        .build())
+                .withPassenger(new PassengerBuilder()
+                        .age(30)
+                        .withDiscount(DiscountCard.Couple)
+                        .build())
+                .withPassenger(new PassengerBuilder()
+                        .age(18)
+                        .build())
+                .build();
+
+        fakeBasePriceRepository.setBasePrice(100);
+        TrainTicketEstimator estimator = trainEstimatorBuilder.withTripRequest(tripRequest).build();
+
+        assertEquals(300, estimator.estimate());
+    }
+
+    @Test
+    void estimateTrainsWithNoCoupleAndDiscountCardHalfCoupleAndTrainStoke() {
+        TripRequest tripRequest = new TripRequestBuilder()
+                .withDetails(new TripDetailsBuilder()
+                        .from("Bordeaux")
+                        .to("Paris")
+                        .when(in31Days)
+                        .build())
+                .withPassenger(new PassengerBuilder()
+                        .age(36)
+                        .withDiscount(DiscountCard.HalfCouple)
+                        .withDiscount(DiscountCard.TrainStroke)
+                        .build())
+                .build();
+
+        fakeBasePriceRepository.setBasePrice(100);
+        TrainTicketEstimator estimator = trainEstimatorBuilder.withTripRequest(tripRequest).build();
+
+        assertEquals(1, estimator.estimate());
+    }
+
+    @Test
+    void estimateTrainsCoupleWithDiscountCardHalfCoupleAndHalfCouple() {
+        TripRequest tripRequest = new TripRequestBuilder()
+                .withDetails(new TripDetailsBuilder()
+                        .from("Bordeaux")
+                        .to("Paris")
+                        .when(in31Days)
+                        .build())
+                .withPassenger(new PassengerBuilder()
+                        .age(36)
+                        .withDiscount(DiscountCard.HalfCouple)
+                        .build())
+                .withPassenger(new PassengerBuilder()
+                        .age(36)
+                        .withDiscount(DiscountCard.HalfCouple)
+                        .build())
+                .build();
+
+        fakeBasePriceRepository.setBasePrice(100);
+        TrainTicketEstimator estimator = trainEstimatorBuilder.withTripRequest(tripRequest).build();
+
+        assertEquals(200, estimator.estimate());
     }
 }

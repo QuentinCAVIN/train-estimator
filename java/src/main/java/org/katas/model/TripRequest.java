@@ -6,6 +6,20 @@ import java.util.Date;
 import java.util.List;
 
 public record TripRequest(TripDetails details, List<Passenger> passengers) {
+
+    public boolean isEligibleCouple() {
+        return passengers.size() == 2 &&
+                passengers.stream().allMatch(Passenger::isMajor) &&
+                passengers.stream().anyMatch(p -> p.discounts().contains(DiscountCard.Couple));
+    }
+
+    public boolean isEligibleHalfCouple() {
+        return passengers.size() == 1 &&
+                passengers.stream().allMatch(Passenger::isMajor) &&
+                passengers.stream().anyMatch(p -> p.discounts().contains(DiscountCard.HalfCouple)) &&
+                passengers.stream().noneMatch(p -> p.discounts().contains(DiscountCard.TrainStroke));
+    }
+
     public void isValid() {
         if (passengers().isEmpty()) {
             throw new InvalidTripInputException("No passenger");
@@ -24,7 +38,7 @@ public record TripRequest(TripDetails details, List<Passenger> passengers) {
             throw new InvalidTripInputException("Date is invalid");
         }
         for (Passenger passenger : passengers()) {
-             passenger.isValid();
+            passenger.isValid();
         }
     }
 }

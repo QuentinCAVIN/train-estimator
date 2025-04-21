@@ -46,37 +46,13 @@ public class TrainTicketEstimator {
         }
 
         // Réduction couple (2 passagers adultes avec carte Couple)
-        if (passengers.size() == 2) {
-            boolean couple = false;
-            boolean minor = false;
-            for (Passenger passenger : passengers) {
-                if (passenger.discounts().contains(DiscountCard.Couple)) {
-                    couple = true;
-                }
-                if (passenger.age() < 18) {
-                    minor = true;
-                }
-            }
-            if (couple && !minor) {
-                total -= basePrice * 0.2 * 2;
-            }
+        if (trainDetails.isEligibleCouple()) {
+            total -= basePrice * 0.2 * 2;
         }
 
         // Réduction demi-couple (1 adulte avec carte HalfCouple)
-        if (passengers.size() == 1) {
-            boolean halfCouple = false;
-            boolean minor = false;
-            for (Passenger passenger : passengers) {
-                if (passenger.discounts().contains(DiscountCard.HalfCouple)) {
-                    halfCouple = true;
-                }
-                if (passenger.age() < 18) {
-                    minor = true;
-                }
-            }
-            if (halfCouple && !minor) {
-                total -= basePrice * 0.1;
-            }
+        if (trainDetails.isEligibleHalfCouple()) {
+            total -= basePrice * 0.1;
         }
 
         // Prix final estimé

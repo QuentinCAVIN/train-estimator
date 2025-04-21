@@ -12,9 +12,9 @@ public record Passenger(int age, List<DiscountCard> discounts) {
             temp = 0;
         } else if (age < 4){
             temp = 9;
-        } else if (age <= 17) {
+        } else if (!isMajor()) {
             temp = basePrice * 0.6;
-        } else if (age >= 70) {
+        } else if (isSenior()) {
             temp = basePrice * 0.8;
             if (discounts().contains(DiscountCard.Senior)) {
                 temp -= basePrice * 0.2;
@@ -23,6 +23,13 @@ public record Passenger(int age, List<DiscountCard> discounts) {
             temp = basePrice * 1.2;
         }
         return temp;
+    }
+
+    public boolean isMajor() {
+        return age >= 18;
+    }
+    public boolean isSenior() {
+        return age >= 70;
     }
 
     public void isValid() {

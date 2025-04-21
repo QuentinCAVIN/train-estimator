@@ -1,15 +1,15 @@
-package org.katas.model;
+package service;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.katas.builder.PassengerBuilder;
-import org.katas.builder.TrainTicketEstimatorTestBuilder;
-import org.katas.fake.FakeBasePriceRepository;
+import org.katas.model.DiscountCard;
+import org.katas.model.Passenger;
 import org.katas.service.PriceModifierService;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class PassengerTest {
+public class PriceModifierServiceTest {
 
     PriceModifierService priceModifier;
 

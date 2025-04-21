@@ -1,6 +1,7 @@
 package org.katas;
 
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.katas.builder.PassengerBuilder;
 import org.katas.builder.TrainTicketEstimatorTestBuilder;
@@ -44,6 +45,9 @@ PriceModifierService priceModifier;
 
     Date in31Days = new Date(System.currentTimeMillis() + 31L * 24 * 60 * 60 * 1000);
 
+
+    //Ci-dessous test des throws
+    ////////////////
     @Test
     void estimateTrainsWithNoDepartureCity_ShouldThrowException() {
         TripRequest tripRequest = new TripRequestBuilder()
@@ -79,7 +83,28 @@ PriceModifierService priceModifier;
 
     }
 
-    // TODO Rajouter un test qui vérifie le TripDetail avec une Date null
+    // TODO Prévoir la date null dans le code de prod?
+    @Disabled
+    @Test
+    void estimateTrainsWithNullDate_ShouldThrowException() {
+
+        TripRequest tripRequest = new TripRequestBuilder()
+                .withDetails(new TripDetailsBuilder()
+                        .from("Bordeaux")
+                        .to("Paris")
+                        .when(null)
+                        .build())
+                .withPassenger(new PassengerBuilder()
+                        .build())
+                .build();
+
+        InvalidTripInputException exception = assertThrows(InvalidTripInputException.class, () -> {
+            trainEstimatorBuilder.withTripRequest(tripRequest).build();
+        });
+        assertEquals("Date is invalid", exception.getMessage());
+    }
+
+
     @Test
     void estimateTrainsWithInvalidDate_ShouldThrowException() {
         Date yesterday = new Date(System.currentTimeMillis() - 24 * 60 * 60 * 1000);
@@ -118,29 +143,12 @@ PriceModifierService priceModifier;
         assertEquals("Age is invalid", exception.getMessage());
     }
 
-    //TODO BUG Détécté sur les enfants à corriger une fois les tests en place
-//    @Test
-//    void estimateTrainsWithAge_ShouldThrowException() {
-//        new TripRequestBuilder()
-//                .withDetails(new TripDetailsBuilder()
-//                        .from("Bordeaux")
-//                        .to("Paris")
-//                        .build())
-//                .withPassenger(new PassengerBuilder()
-//                        .age(0)
-//                        .build())
-//                .build();
-//
-//        TrainTicketEstimatorStub trainEstimator = new TrainTicketEstimatorStub();
-//        assertEquals(0, trainEstimator.estimate());
-//    }
+    //////////
 
+    //TODO BUG BUG BUG : -20€ Quand l'utilisateur à moins de 1 an / 100 € quand le billet est prix en retard
+    @Disabled
     @Test
-    void UpdateBasePriceAccordingToDate_departureDateIn31Days() {
-        double basePrice = 100.00;
-        double priceModified = 120;
-        Date in31Days = new Date(System.currentTimeMillis() + 31L * 24 * 60 * 60 * 1000);
-
+    void bug() {
         TripRequest tripRequest = new TripRequestBuilder()
                 .withDetails(new TripDetailsBuilder()
                         .from("Bordeaux")
@@ -148,9 +156,25 @@ PriceModifierService priceModifier;
                         .when(in31Days)
                         .build())
                 .withPassenger(new PassengerBuilder()
-                        .age(30)
+                        .age(0)
+                        .withOutDiscount()
                         .build())
                 .build();
+
+        fakeBasePriceRepository.setBasePrice(100);
+        TrainTicketEstimator estimator = trainEstimatorBuilder.withTripRequest(tripRequest).build();
+
+        assertEquals(0, estimator.estimate());
+    }
+
+
+    // Ci dessous déplacer dans un package de test unitaire de PriceModifierService
+    /// ////////
+    @Test
+    void UpdateBasePriceAccordingToDate_departureDateIn31Days() {
+        double basePrice = 100.00;
+        double priceModified = 120;
+        Date in31Days = new Date(System.currentTimeMillis() + 31L * 24 * 60 * 60 * 1000);
 
         assertEquals(100, priceModifier.applyingDateModifierOnPrice(in31Days,priceModified, basePrice));
     }
@@ -161,17 +185,6 @@ PriceModifierService priceModifier;
         double priceModified = 120;
         Date tomorrow = new Date(System.currentTimeMillis() + 24 * 60 * 60 * 1000);
 
-        TripRequest tripRequest = new TripRequestBuilder()
-                .withDetails(new TripDetailsBuilder()
-                        .from("Bordeaux")
-                        .to("Paris")
-                        .when(tomorrow)
-                        .build())
-                .withPassenger(new PassengerBuilder()
-                        .age(30)
-                        .build())
-                .build();
-
         assertEquals(220, priceModifier.applyingDateModifierOnPrice(tomorrow,priceModified, basePrice));
     }
 
@@ -181,39 +194,18 @@ PriceModifierService priceModifier;
         double priceModified = 120;
         Date in5Days = new Date(System.currentTimeMillis() + 5 * 24 * 60 * 60 * 1000);
 
-        TripRequest tripRequest = new TripRequestBuilder()
-                .withDetails(new TripDetailsBuilder()
-                        .from("Bordeaux")
-                        .to("Paris")
-                        .when(in5Days)
-                        .build())
-                .withPassenger(new PassengerBuilder()
-                        .age(30)
-                        .build())
-                .build();
-
         assertEquals(220, priceModifier.applyingDateModifierOnPrice(in5Days,priceModified, basePrice));
     }
 
     @Test
     void UpdateBasePriceAccordingToDate_departureDateIn10Days() {
         double basePrice = 100.00;
-        double priceModified = 120;
+        double priceModified = 100;
         Date in10Days = new Date(System.currentTimeMillis() + 10 * 24 * 60 * 60 * 1000);
 
-        TripRequest tripRequest = new TripRequestBuilder()
-                .withDetails(new TripDetailsBuilder()
-                        .from("Bordeaux")
-                        .to("Paris")
-                        .when(in10Days)
-                        .build())
-                .withPassenger(new PassengerBuilder()
-                        .age(30)
-                        .build())
-                .build();
-
-        assertEquals(140, priceModifier.applyingDateModifierOnPrice(in10Days,priceModified, basePrice));
+        assertEquals(120, priceModifier.applyingDateModifierOnPrice(in10Days,priceModified, basePrice));
     }
+    ////////////
 
     //////// DISCOUNT TEST CI DESSOUS
     ///

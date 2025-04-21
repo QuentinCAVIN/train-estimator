@@ -10,6 +10,8 @@ import java.util.Date;
 
 public class PriceModifierService {
 
+    BookingService bookingService = new BookingService();
+
     public double applyingAgeModifierOnPrice(Passenger passenger, double basePrice) {
         double priceModified;
 
@@ -29,26 +31,21 @@ public class PriceModifierService {
 
     public double applyingDateModifierOnPrice(Date departure, double priceModified, double basePrice) {
         Date today = new Date();
-        Date datePlus30 = new Date(today.getTime());
-        datePlus30.setDate(datePlus30.getDate() + 30);
+        BookingTiming timing = bookingService.determineBookingTiming(departure, today);
 
-        // Si réservation < à 30 jours
-        if (departure.after(datePlus30) || departure.equals(datePlus30)) {
-            return priceModified - basePrice * 0.2;
+        switch (timing) {
+            case EARLY:
+                return priceModified - basePrice * 0.2;
+
+            case STANDARD:
+                int diffDays = DateHelper.getDifferenceInDays(departure, today);
+                double surcharge = (20 - diffDays) * 0.02 * basePrice;
+                return priceModified + surcharge;
+
+            case LAST_MINUTE:
+            default:
+                return priceModified + basePrice;
         }
-
-        // Réservation entre 6 et 29 jours à l’avance
-        Date datePlus5 = new Date(today.getTime());
-        datePlus5.setDate(datePlus5.getDate() + 5);
-
-        if (departure.after(datePlus5)) {
-            int diffDays = DateHelper.getDifferenceInDays(departure, today);
-            double surcharge = (20 - diffDays) * 0.02 * basePrice;
-            return priceModified + surcharge;
-        }
-
-        // Réservation moins de 5 jours
-        return priceModified + basePrice;
     }
 
     public double applyDiscounts(Passenger passenger, double currentPrice, double basePrice) {

@@ -1,7 +1,6 @@
 package org.katas.model;
 
-public enum DiscountCard
-{
+public enum DiscountCard {
     Senior("Senior"),
     TrainStroke("TrainStroke"),
     Couple("Couple"),
@@ -16,5 +15,4 @@ public enum DiscountCard
     String getCard() {
         return card;
     }
-
 }

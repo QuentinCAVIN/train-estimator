@@ -1,5 +1,6 @@
 package org.katas.service;
 
+import org.katas.helper.DateHelper;
 import org.katas.model.*;
 
 
@@ -10,46 +11,44 @@ import java.util.Date;
 public class PriceModifierService {
 
     public double applyingAgeModifierOnPrice(Passenger passenger, double basePrice) {
-        double temp;
-        // Tarification selon l'âge
+        double priceModified;
+
         if (passenger.isInfant()) {
-            temp = 0;
-        } else if (passenger.isToddler()){
-            temp = 9;
+            priceModified = 0;
+        } else if (passenger.isToddler()) {
+            priceModified = 9;
         } else if (!passenger.isMajor()) {
-            temp = basePrice * 0.6;
+            priceModified = basePrice * 0.6;
         } else if (passenger.isSenior()) {
-            temp = basePrice * 0.8;
+            priceModified = basePrice * 0.8;
         } else {
-            temp = basePrice * 1.2;
+            priceModified = basePrice * 1.2;
         }
-        return temp;
+        return priceModified;
     }
 
-    public double applyingDateModifierOnPrice(Date departure, double modifiedPrice, double basePrice) {
-// DATE CHOISI = 10/05/2025
-        Date currentDate = new Date();
-//  NOUS SOMME LE   01/05/2025
-        currentDate.setDate(currentDate.getDate() + 30);
-//        31/05/2025
-        if (departure.getTime() >= currentDate.getTime()) {
-            modifiedPrice -= basePrice * 0.2;
-        } else {
-            // Sinon, majoration progressive si date proche
-            currentDate.setDate(currentDate.getDate() - 30 + 5);
-//            06/05/2025
-            if (departure.getTime() > currentDate.getTime()) {
-//                10/05/2025   >   06/05/2025
-                currentDate.setDate(currentDate.getDate() - 5);
-//                01/05/2025
-                var diffDays = ((int) (departure.getTime() / (24 * 60 * 60 * 1000)) - (int) (currentDate.getTime() / (24 * 60 * 60 * 1000)));
-                modifiedPrice += (20 - diffDays) * 0.02 * basePrice;
-            } else {
-                // Réservation très tardive → plein tarif + surcharge
-                modifiedPrice += basePrice;
-            }
+    public double applyingDateModifierOnPrice(Date departure, double priceModified, double basePrice) {
+        Date today = new Date();
+        Date datePlus30 = new Date(today.getTime());
+        datePlus30.setDate(datePlus30.getDate() + 30);
+
+        // Si réservation < à 30 jours
+        if (departure.after(datePlus30) || departure.equals(datePlus30)) {
+            return priceModified - basePrice * 0.2;
         }
-        return modifiedPrice;
+
+        // Réservation entre 6 et 29 jours à l’avance
+        Date datePlus5 = new Date(today.getTime());
+        datePlus5.setDate(datePlus5.getDate() + 5);
+
+        if (departure.after(datePlus5)) {
+            int diffDays = DateHelper.getDifferenceInDays(departure, today);
+            double surcharge = (20 - diffDays) * 0.02 * basePrice;
+            return priceModified + surcharge;
+        }
+
+        // Réservation moins de 5 jours
+        return priceModified + basePrice;
     }
 
     public double applyDiscounts(Passenger passenger, double currentPrice, double basePrice) {

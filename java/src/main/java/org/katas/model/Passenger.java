@@ -11,12 +11,13 @@ public record Passenger(int age, List<DiscountCard> discounts) {
     }
 
     public boolean isToddler() {
-        return age >= 1 && age <= 3 ;
+        return age >= 1 && age <= 3;
     }
 
     public boolean isMajor() {
         return age >= 18;
     }
+
     public boolean isSenior() {
         return age >= 70;
     }

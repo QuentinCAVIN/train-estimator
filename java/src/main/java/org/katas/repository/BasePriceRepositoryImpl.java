@@ -2,7 +2,7 @@ package org.katas.repository;
 
 import org.json.JSONObject;
 import org.katas.model.TripRequest;
-import org.katas.model.exceptions.ApiException;
+import org.katas.exceptions.ApiException;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;

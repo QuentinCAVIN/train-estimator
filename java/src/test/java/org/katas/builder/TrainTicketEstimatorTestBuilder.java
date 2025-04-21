@@ -1,5 +1,7 @@
-package org.katas;
+package org.katas.builder;
 
+import org.katas.TrainTicketEstimator;
+import org.katas.fake.FakeBasePriceRepository;
 import org.katas.model.TripRequest;
 
 public class TrainTicketEstimatorTestBuilder {

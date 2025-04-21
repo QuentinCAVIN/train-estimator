@@ -35,11 +35,11 @@ public class TrainTicketEstimator {
 
         for (Passenger passenger : passengers) {
 
-            temp = passenger.getBasePriceBasedOnAge(basePrice);
+            temp = passenger.applyingAgeModifierOnPrice(basePrice);
 //            temp = getBasePriceBasedOnAge(passenger, basePrice);
 
             // Appel méthode de calcul du prix en fonction de la date de départ
-            temp = changesBasePriceDependingOnDate(trainDetails, temp, basePrice);
+            temp = applyingDateModifierOnPrice(trainDetails, temp, basePrice);
 
             // Réduction spéciale carte TrainStroke
             if (passenger.discounts().contains(DiscountCard.TrainStroke)) {
@@ -89,7 +89,7 @@ public class TrainTicketEstimator {
     }
 
     // TODO Refactor pour envisager de mettre la variable basePrice en constante?
-    protected double changesBasePriceDependingOnDate(TripRequest trainDetails, double temp, double basePrice) {
+    protected double applyingDateModifierOnPrice(TripRequest trainDetails, double temp, double basePrice) {
 // DATE CHOISI = 10/05/2025
         Date currentDate = new Date();
 //  NOUS SOMME LE   01/05/2025

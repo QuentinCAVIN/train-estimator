@@ -2,10 +2,15 @@ package org.katas;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.katas.builder.PassengerBuilder;
+import org.katas.builder.TrainTicketEstimatorTestBuilder;
+import org.katas.builder.TripDetailsBuilder;
+import org.katas.builder.TripRequestBuilder;
+import org.katas.fake.FakeBasePriceRepository;
 import org.katas.model.DiscountCard;
 import org.katas.model.Passenger;
 import org.katas.model.TripRequest;
-import org.katas.model.exceptions.InvalidTripInputException;
+import org.katas.exceptions.InvalidTripInputException;
 
 import java.util.Date;
 
@@ -125,66 +130,6 @@ FakeBasePriceRepository fakeBasePriceRepository;
 //        TrainTicketEstimatorStub trainEstimator = new TrainTicketEstimatorStub();
 //        assertEquals(0, trainEstimator.estimate());
 //    }
-    @Test
-    void BasePriceWithAge0_ShouldReturn0e() {
-        double basePrice = 100.00;
-        Passenger passenger = new PassengerBuilder()
-                .age(0)
-                .build();
-
-        assertEquals(0, passenger.getBasePriceBasedOnAge(basePrice));
-    }
-    @Test
-    void BasePriceWithAge2_ShouldReturn() {
-        double basePrice = 100.00;
-        Passenger passenger = new PassengerBuilder()
-                .age(2)
-                .build();
-
-        assertEquals(9, passenger.getBasePriceBasedOnAge(basePrice));
-    }
-
-    @Test
-    void BasePriceWithAge15_ShouldReturn160e() {
-        double basePrice = 100.00;
-        Passenger passenger = new PassengerBuilder()
-                .age(15)
-                .build();
-
-        assertEquals(60, passenger.getBasePriceBasedOnAge(basePrice));
-    }
-
-    @Test
-    void BasePriceWithAge37_ShouldReturn120e() {
-        double basePrice = 100.00;
-        Passenger passenger = new PassengerBuilder()
-                .age(37)
-                .build();
-
-        assertEquals(120, passenger.getBasePriceBasedOnAge(basePrice));
-    }
-
-    @Test
-    void BasePriceWithAge70WithoutDiscountCard_ShouldReturn80e() {
-        double basePrice = 100.00;
-        Passenger passenger = new PassengerBuilder()
-                .age(70)
-                .withOutDiscount()
-                .build();
-
-        assertEquals(80, passenger.getBasePriceBasedOnAge(basePrice));
-    }
-
-    @Test
-    void BasePriceWithAge70WitDiscountCard_ShouldReturn60e() {
-        double basePrice = 100.00;
-        Passenger passenger = new PassengerBuilder()
-                .withDiscount(DiscountCard.Senior)
-                .age(71)
-                .build();
-
-       assertEquals(60, passenger.getBasePriceBasedOnAge(basePrice));
-    }
 
     @Test
     void UpdateBasePriceAccordingToDate_departureDateIn31Days() {
@@ -204,7 +149,7 @@ FakeBasePriceRepository fakeBasePriceRepository;
                 .build();
         TrainTicketEstimator estimator = trainEstimatorBuilder.withTripRequest(tripRequest).build();
 
-        assertEquals(100, estimator.changesBasePriceDependingOnDate(tripRequest, priceModified, basePrice));
+        assertEquals(100, estimator.applyingDateModifierOnPrice(tripRequest, priceModified, basePrice));
     }
 
     @Test
@@ -226,7 +171,7 @@ FakeBasePriceRepository fakeBasePriceRepository;
 
         TrainTicketEstimator estimator = trainEstimatorBuilder.withTripRequest(tripRequest).build();
 
-        assertEquals(220, estimator.changesBasePriceDependingOnDate(tripRequest, priceModified, basePrice));
+        assertEquals(220, estimator.applyingDateModifierOnPrice(tripRequest, priceModified, basePrice));
     }
 
     @Test
@@ -248,7 +193,7 @@ FakeBasePriceRepository fakeBasePriceRepository;
 
         TrainTicketEstimator estimator = trainEstimatorBuilder.withTripRequest(tripRequest).build();
 
-        assertEquals(220, estimator.changesBasePriceDependingOnDate(tripRequest, priceModified, basePrice));
+        assertEquals(220, estimator.applyingDateModifierOnPrice(tripRequest, priceModified, basePrice));
     }
 
     @Test
@@ -269,7 +214,7 @@ FakeBasePriceRepository fakeBasePriceRepository;
                 .build();
         TrainTicketEstimator estimator = trainEstimatorBuilder.withTripRequest(tripRequest).build();
 
-        assertEquals(140, estimator.changesBasePriceDependingOnDate(tripRequest, priceModified, basePrice));
+        assertEquals(140, estimator.applyingDateModifierOnPrice(tripRequest, priceModified, basePrice));
     }
 
     @Test

@@ -1,11 +1,11 @@
 package org.katas.model;
 
-import org.katas.model.exceptions.InvalidTripInputException;
+import org.katas.exceptions.InvalidTripInputException;
 
 import java.util.List;
 
 public record Passenger(int age, List<DiscountCard> discounts) {
-    public double getBasePriceBasedOnAge(double basePrice) {
+    public double applyingAgeModifierOnPrice(double basePrice) {
         double temp;
         // Tarification selon l'âge
         if (age < 1) {

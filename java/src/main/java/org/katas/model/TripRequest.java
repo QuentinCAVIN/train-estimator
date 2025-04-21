@@ -1,6 +1,6 @@
 package org.katas.model;
 
-import org.katas.model.exceptions.InvalidTripInputException;
+import org.katas.exceptions.InvalidTripInputException;
 
 import java.util.Date;
 import java.util.List;

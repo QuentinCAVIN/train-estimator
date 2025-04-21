@@ -1,4 +1,4 @@
-package org.katas.model.exceptions;
+package org.katas.exceptions;
 
 public class ApiException extends RuntimeException {
 

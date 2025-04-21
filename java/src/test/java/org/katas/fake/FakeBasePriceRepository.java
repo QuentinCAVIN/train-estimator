@@ -1,4 +1,4 @@
-package org.katas;
+package org.katas.fake;
 
 import org.katas.model.TripRequest;
 import org.katas.repository.IBasePriceRepository;

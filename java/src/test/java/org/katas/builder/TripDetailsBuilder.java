@@ -1,4 +1,4 @@
-package org.katas;
+package org.katas.builder;
 
 import org.katas.model.TripDetails;
 

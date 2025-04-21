@@ -1,11 +1,22 @@
 package org.katas.model;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.katas.builder.PassengerBuilder;
+import org.katas.builder.TrainTicketEstimatorTestBuilder;
+import org.katas.fake.FakeBasePriceRepository;
+import org.katas.service.PriceModifierService;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class PassengerTest {
+
+    PriceModifierService priceModifier;
+
+    @BeforeEach
+    public void setUp() {
+        priceModifier = new PriceModifierService();
+    }
 
     @Test
     void BasePriceWithAge0_ShouldReturn0e() {
@@ -14,7 +25,7 @@ public class PassengerTest {
                 .age(0)
                 .build();
 
-        assertEquals(0, passenger.applyingAgeModifierOnPrice(basePrice));
+        assertEquals(0, priceModifier.applyingAgeModifierOnPrice(passenger, basePrice));
     }
     @Test
     void BasePriceWithAge2_ShouldReturn() {
@@ -23,7 +34,7 @@ public class PassengerTest {
                 .age(2)
                 .build();
 
-        assertEquals(9, passenger.applyingAgeModifierOnPrice(basePrice));
+        assertEquals(9, priceModifier.applyingAgeModifierOnPrice(passenger, basePrice));
     }
 
     @Test
@@ -33,7 +44,7 @@ public class PassengerTest {
                 .age(15)
                 .build();
 
-        assertEquals(60, passenger.applyingAgeModifierOnPrice(basePrice));
+        assertEquals(60, priceModifier.applyingAgeModifierOnPrice(passenger, basePrice));
     }
 
     @Test
@@ -43,7 +54,7 @@ public class PassengerTest {
                 .age(37)
                 .build();
 
-        assertEquals(120, passenger.applyingAgeModifierOnPrice(basePrice));
+        assertEquals(120, priceModifier.applyingAgeModifierOnPrice(passenger, basePrice));
     }
 
     @Test
@@ -54,7 +65,7 @@ public class PassengerTest {
                 .withOutDiscount()
                 .build();
 
-        assertEquals(80, passenger.applyingAgeModifierOnPrice(basePrice));
+        assertEquals(80, priceModifier.applyingAgeModifierOnPrice(passenger, basePrice));
     }
 
     @Test
@@ -65,6 +76,6 @@ public class PassengerTest {
                 .age(71)
                 .build();
 
-        assertEquals(80, passenger.applyingAgeModifierOnPrice(basePrice));
+        assertEquals(80, priceModifier.applyingAgeModifierOnPrice(passenger, basePrice));
     }
 }

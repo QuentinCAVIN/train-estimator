@@ -5,6 +5,7 @@ import org.katas.model.Passenger;
 import org.katas.model.TripRequest;
 import org.katas.repository.BasePriceRepositoryImpl;
 import org.katas.repository.IBasePriceRepository;
+import org.katas.service.PriceModifierService;
 
 import java.util.List;
 
@@ -12,6 +13,7 @@ public class TrainTicketEstimator {
 
     TripRequest trainDetails;
     IBasePriceRepository basePriceRepository;
+    PriceModifierService priceModifier = new PriceModifierService();
 
     public TrainTicketEstimator(IBasePriceRepository basePriceRepository, TripRequest trainDetails) {
         this.basePriceRepository = basePriceRepository;
@@ -19,7 +21,6 @@ public class TrainTicketEstimator {
         trainDetails.isValid();
     }
 
-    // Si aucun passager, le prix est 0
     public double estimate() {
 
         // Appel à l’API pour obtenir le prix de base du trajet
@@ -31,39 +32,15 @@ public class TrainTicketEstimator {
 
         for (Passenger passenger : passengers) {
 
-           double modifiedPrice = passenger.applyingAgeModifierOnPrice(basePrice);
+           double modifiedPrice = priceModifier.applyingAgeModifierOnPrice(passenger, basePrice);
 
-            // Appel méthode de calcul du prix en fonction de la date de départ
-            modifiedPrice = trainDetails.details().applyingDateModifierOnPrice(modifiedPrice, basePrice);
+            // méthode de calcul du prix en fonction de la date de départ
+            modifiedPrice = priceModifier.applyingDateModifierOnPrice(trainDetails.details().when() ,modifiedPrice, basePrice);
 
-
-            // Réduction spéciale carte TrainStroke
-            if (passenger.discounts().contains(DiscountCard.TrainStroke)) {
-                modifiedPrice = 1;
-            }
-            if (passenger.discounts().contains(DiscountCard.Senior)) {
-                modifiedPrice -= basePrice * 0.2;
-            }
-
-            // Ajout au total et réinitialisation
-            total += modifiedPrice;
+            total += priceModifier.applyDiscounts(passenger, modifiedPrice, basePrice);
         }
 
-
-
-
-        // Réduction couple (2 passagers adultes avec carte Couple)
-        if (trainDetails.isEligibleCouple()) {
-            total -= basePrice * 0.2 * 2;
-        }
-
-        // Réduction demi-couple (1 adulte avec carte HalfCouple)
-        if (trainDetails.isEligibleHalfCouple()) {
-            total -= basePrice * 0.1;
-        }
-
-        // Prix final estimé
-        return total;
+        return priceModifier.applyGroupDiscounts(trainDetails, total, basePrice);
     }
 
     //Constructeur et méthode nécessaires pour assurer la rétrocompatibilité

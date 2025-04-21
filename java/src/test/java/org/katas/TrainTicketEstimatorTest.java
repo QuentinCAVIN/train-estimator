@@ -10,6 +10,7 @@ import org.katas.fake.FakeBasePriceRepository;
 import org.katas.model.DiscountCard;
 import org.katas.model.TripRequest;
 import org.katas.exceptions.InvalidTripInputException;
+import org.katas.service.PriceModifierService;
 
 import java.util.Date;
 
@@ -18,10 +19,12 @@ class TrainTicketEstimatorTest {
 
 TrainTicketEstimatorTestBuilder trainEstimatorBuilder;
 FakeBasePriceRepository fakeBasePriceRepository;
+PriceModifierService priceModifier;
     @BeforeEach
     public void setUp() {
         fakeBasePriceRepository = new FakeBasePriceRepository();
         trainEstimatorBuilder = new TrainTicketEstimatorTestBuilder(fakeBasePriceRepository);
+        priceModifier = new PriceModifierService();
     }
 
     @Test
@@ -149,7 +152,7 @@ FakeBasePriceRepository fakeBasePriceRepository;
                         .build())
                 .build();
 
-        assertEquals(100, tripRequest.details().applyingDateModifierOnPrice(priceModified, basePrice));
+        assertEquals(100, priceModifier.applyingDateModifierOnPrice(in31Days,priceModified, basePrice));
     }
 
     @Test
@@ -169,27 +172,27 @@ FakeBasePriceRepository fakeBasePriceRepository;
                         .build())
                 .build();
 
-        assertEquals(220, tripRequest.details().applyingDateModifierOnPrice(priceModified, basePrice));
+        assertEquals(220, priceModifier.applyingDateModifierOnPrice(tomorrow,priceModified, basePrice));
     }
 
     @Test
     void UpdateBasePriceAccordingToDate_departureDateIn5Days() {
         double basePrice = 100.00;
         double priceModified = 120;
-        Date In5Days = new Date(System.currentTimeMillis() + 5 * 24 * 60 * 60 * 1000);
+        Date in5Days = new Date(System.currentTimeMillis() + 5 * 24 * 60 * 60 * 1000);
 
         TripRequest tripRequest = new TripRequestBuilder()
                 .withDetails(new TripDetailsBuilder()
                         .from("Bordeaux")
                         .to("Paris")
-                        .when(In5Days)
+                        .when(in5Days)
                         .build())
                 .withPassenger(new PassengerBuilder()
                         .age(30)
                         .build())
                 .build();
 
-        assertEquals(220, tripRequest.details().applyingDateModifierOnPrice(priceModified, basePrice));
+        assertEquals(220, priceModifier.applyingDateModifierOnPrice(in5Days,priceModified, basePrice));
     }
 
     @Test
@@ -209,7 +212,7 @@ FakeBasePriceRepository fakeBasePriceRepository;
                         .build())
                 .build();
 
-        assertEquals(140, tripRequest.details().applyingDateModifierOnPrice(priceModified, basePrice));
+        assertEquals(140, priceModifier.applyingDateModifierOnPrice(in10Days,priceModified, basePrice));
     }
 
     //////// DISCOUNT TEST CI DESSOUS

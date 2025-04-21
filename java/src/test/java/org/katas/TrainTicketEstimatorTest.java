@@ -8,7 +8,6 @@ import org.katas.builder.TripDetailsBuilder;
 import org.katas.builder.TripRequestBuilder;
 import org.katas.fake.FakeBasePriceRepository;
 import org.katas.model.DiscountCard;
-import org.katas.model.Passenger;
 import org.katas.model.TripRequest;
 import org.katas.exceptions.InvalidTripInputException;
 
@@ -147,9 +146,8 @@ FakeBasePriceRepository fakeBasePriceRepository;
                         .age(30)
                         .build())
                 .build();
-        TrainTicketEstimator estimator = trainEstimatorBuilder.withTripRequest(tripRequest).build();
 
-        assertEquals(100, estimator.applyingDateModifierOnPrice(tripRequest, priceModified, basePrice));
+        assertEquals(100, tripRequest.details().applyingDateModifierOnPrice(priceModified, basePrice));
     }
 
     @Test
@@ -169,9 +167,7 @@ FakeBasePriceRepository fakeBasePriceRepository;
                         .build())
                 .build();
 
-        TrainTicketEstimator estimator = trainEstimatorBuilder.withTripRequest(tripRequest).build();
-
-        assertEquals(220, estimator.applyingDateModifierOnPrice(tripRequest, priceModified, basePrice));
+        assertEquals(220, tripRequest.details().applyingDateModifierOnPrice(priceModified, basePrice));
     }
 
     @Test
@@ -191,9 +187,7 @@ FakeBasePriceRepository fakeBasePriceRepository;
                         .build())
                 .build();
 
-        TrainTicketEstimator estimator = trainEstimatorBuilder.withTripRequest(tripRequest).build();
-
-        assertEquals(220, estimator.applyingDateModifierOnPrice(tripRequest, priceModified, basePrice));
+        assertEquals(220, tripRequest.details().applyingDateModifierOnPrice(priceModified, basePrice));
     }
 
     @Test
@@ -212,9 +206,8 @@ FakeBasePriceRepository fakeBasePriceRepository;
                         .age(30)
                         .build())
                 .build();
-        TrainTicketEstimator estimator = trainEstimatorBuilder.withTripRequest(tripRequest).build();
 
-        assertEquals(140, estimator.applyingDateModifierOnPrice(tripRequest, priceModified, basePrice));
+        assertEquals(140, tripRequest.details().applyingDateModifierOnPrice(priceModified, basePrice));
     }
 
     @Test

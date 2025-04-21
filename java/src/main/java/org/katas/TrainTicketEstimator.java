@@ -6,7 +6,6 @@ import org.katas.model.TripRequest;
 import org.katas.repository.BasePriceRepositoryImpl;
 import org.katas.repository.IBasePriceRepository;
 
-import java.util.Date;
 import java.util.List;
 
 public class TrainTicketEstimator {
@@ -20,7 +19,6 @@ public class TrainTicketEstimator {
         trainDetails.isValid();
     }
 
-
     // Si aucun passager, le prix est 0
     public double estimate() {
 
@@ -30,24 +28,21 @@ public class TrainTicketEstimator {
         // Liste des passagers
         List<Passenger> passengers = trainDetails.passengers();
         double total = 0;
-        // TODO Après test voir si on peux modifier temp en prixTotal
-        double temp;
 
         for (Passenger passenger : passengers) {
 
-            temp = passenger.applyingAgeModifierOnPrice(basePrice);
-//            temp = getBasePriceBasedOnAge(passenger, basePrice);
+           double modifiedPrice = passenger.applyingAgeModifierOnPrice(basePrice);
 
             // Appel méthode de calcul du prix en fonction de la date de départ
-            temp = applyingDateModifierOnPrice(trainDetails, temp, basePrice);
+            modifiedPrice = trainDetails.details().applyingDateModifierOnPrice(modifiedPrice, basePrice);
 
             // Réduction spéciale carte TrainStroke
             if (passenger.discounts().contains(DiscountCard.TrainStroke)) {
-                temp = 1;
+                modifiedPrice = 1;
             }
 
             // Ajout au total et réinitialisation
-            total += temp;
+            total += modifiedPrice;
         }
 
         // Réduction couple (2 passagers adultes avec carte Couple)
@@ -86,33 +81,6 @@ public class TrainTicketEstimator {
 
         // Prix final estimé
         return total;
-    }
-
-    // TODO Refactor pour envisager de mettre la variable basePrice en constante?
-    protected double applyingDateModifierOnPrice(TripRequest trainDetails, double temp, double basePrice) {
-// DATE CHOISI = 10/05/2025
-        Date currentDate = new Date();
-//  NOUS SOMME LE   01/05/2025
-        currentDate.setDate(currentDate.getDate() + 30);
-//        31/05/2025
-        if (trainDetails.details().when().getTime() >= currentDate.getTime()) {
-            temp -= basePrice * 0.2;
-        } else {
-            // Sinon, majoration progressive si date proche
-            currentDate.setDate(currentDate.getDate() - 30 + 5);
-//            06/05/2025
-            if (trainDetails.details().when().getTime() > currentDate.getTime()) {
-//                10/05/2025   >   06/05/2025
-                currentDate.setDate(currentDate.getDate() - 5);
-//                01/05/2025
-                var diffDays = ((int) ((trainDetails.details().when().getTime() / (24 * 60 * 60 * 1000)) - (int) (currentDate.getTime() / (24 * 60 * 60 * 1000))));
-                temp += (20 - diffDays) * 0.02 * basePrice;
-            } else {
-                // Réservation très tardive → plein tarif + surcharge
-                temp += basePrice;
-            }
-        }
-        return temp;
     }
 
     //Constructeur et méthode nécessaires pour assurer la rétrocompatibilité

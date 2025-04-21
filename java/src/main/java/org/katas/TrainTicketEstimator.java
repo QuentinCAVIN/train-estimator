@@ -3,7 +3,9 @@ package org.katas;
 import org.katas.model.DiscountCard;
 import org.katas.model.Passenger;
 import org.katas.model.TripRequest;
+import org.katas.repository.BasePriceRepositoryImpl;
 import org.katas.repository.IBasePriceRepository;
+
 import java.util.Date;
 import java.util.List;
 
@@ -17,6 +19,7 @@ public class TrainTicketEstimator {
         this.trainDetails = trainDetails;
         trainDetails.isValid();
     }
+
 
     // Si aucun passager, le prix est 0
     public double estimate() {
@@ -92,7 +95,7 @@ public class TrainTicketEstimator {
 //  NOUS SOMME LE   01/05/2025
         currentDate.setDate(currentDate.getDate() + 30);
 //        31/05/2025
-        if (trainDetails.details().when().getTime() >= currentDate.getTime() ) {
+        if (trainDetails.details().when().getTime() >= currentDate.getTime()) {
             temp -= basePrice * 0.2;
         } else {
             // Sinon, majoration progressive si date proche
@@ -102,7 +105,7 @@ public class TrainTicketEstimator {
 //                10/05/2025   >   06/05/2025
                 currentDate.setDate(currentDate.getDate() - 5);
 //                01/05/2025
-                var diffDays = ((int)((trainDetails.details().when().getTime()/(24*60*60*1000)) - (int)(currentDate.getTime()/(24*60*60*1000))));
+                var diffDays = ((int) ((trainDetails.details().when().getTime() / (24 * 60 * 60 * 1000)) - (int) (currentDate.getTime() / (24 * 60 * 60 * 1000))));
                 temp += (20 - diffDays) * 0.02 * basePrice;
             } else {
                 // Réservation très tardive → plein tarif + surcharge
@@ -111,4 +114,17 @@ public class TrainTicketEstimator {
         }
         return temp;
     }
+
+    //Constructeur et méthode nécessaires pour assurer la rétrocompatibilité
+    ///////////////////////////
+    public TrainTicketEstimator() {
+        this.basePriceRepository = new BasePriceRepositoryImpl();
+    }
+
+    public double estimate(TripRequest trainDetails) {
+        this.trainDetails = trainDetails;
+        trainDetails.isValid();
+        return estimate();
+    }
+    ///////////////////////////
 }

@@ -10,7 +10,8 @@ public record TripRequest(TripDetails details, List<Passenger> passengers) {
     public boolean isEligibleCouple() {
         return passengers.size() == 2 &&
                 passengers.stream().allMatch(Passenger::isMajor) &&
-                passengers.stream().anyMatch(p -> p.discounts().contains(DiscountCard.Couple));
+                passengers.stream().anyMatch(p -> p.discounts().contains(DiscountCard.Couple)) &&
+                passengers.stream().noneMatch(p -> p.discounts().contains(DiscountCard.TrainStroke));
     }
 
     public boolean isEligibleHalfCouple() {

@@ -387,7 +387,7 @@ FakeBasePriceRepository fakeBasePriceRepository;
         fakeBasePriceRepository.setBasePrice(100);
         TrainTicketEstimator estimator = trainEstimatorBuilder.withTripRequest(tripRequest).build();
 
-        assertEquals(61, estimator.estimate());
+        assertEquals(101, estimator.estimate());
     }
 
     @Test

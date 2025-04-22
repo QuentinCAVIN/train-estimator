@@ -34,7 +34,7 @@ public class PriceModifierService {
         BookingTiming timing = bookingService.determineBookingTiming(departure, today);
 
         switch (timing) {
-            case EARLY:
+            case EARLY, LAST_MINUTE:
                 return priceModified - basePrice * 0.2;
 
             case STANDARD:
@@ -42,15 +42,15 @@ public class PriceModifierService {
                 double surcharge = (20 - diffDays) * 0.02 * basePrice;
                 return priceModified + surcharge;
 
-            case LAST_MINUTE:
+            case LATE:
             default:
                 return priceModified + basePrice;
         }
     }
 
-    public double applyDiscounts(Passenger passenger, double currentPrice, double basePrice) {
-        if (passenger.discounts().contains(DiscountCard.TrainStroke)) return 1;
-        if (passenger.discounts().contains(DiscountCard.Senior) && passenger.age() >= 70) {
+    public double applyIndividualDiscounts(Passenger passenger, double currentPrice, double basePrice) {
+        if (passenger.discounts().contains(DiscountCard.TRAINSTROKE)) return 1;
+        if (passenger.discounts().contains(DiscountCard.SENIOR) && passenger.age() >= 70) {
             return currentPrice - basePrice * 0.2;
         }
         return currentPrice;

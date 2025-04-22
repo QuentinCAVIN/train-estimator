@@ -4,7 +4,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.katas.builder.PassengerBuilder;
-import org.katas.builder.TrainTicketEstimatorTestBuilder;
+import org.katas.builder.FakeTrainTicketEstimatorBuilder;
 import org.katas.builder.TripDetailsBuilder;
 import org.katas.builder.TripRequestBuilder;
 import org.katas.fake.FakeBasePriceRepository;
@@ -18,13 +18,14 @@ import java.util.Date;
 import static org.junit.jupiter.api.Assertions.*;
 class TrainTicketEstimatorTest {
 
-TrainTicketEstimatorTestBuilder trainEstimatorBuilder;
+FakeTrainTicketEstimatorBuilder trainEstimatorBuilder;
 FakeBasePriceRepository fakeBasePriceRepository;
 PriceModifierService priceModifier;
+
     @BeforeEach
     public void setUp() {
         fakeBasePriceRepository = new FakeBasePriceRepository();
-        trainEstimatorBuilder = new TrainTicketEstimatorTestBuilder(fakeBasePriceRepository);
+        trainEstimatorBuilder = new FakeTrainTicketEstimatorBuilder();
         priceModifier = new PriceModifierService();
     }
 
@@ -189,12 +190,21 @@ PriceModifierService priceModifier;
     }
 
     @Test
+    void UpdateBasePriceAccordingToDate_departureDateIn6Days() {
+        double basePrice = 100.00;
+        double priceModified = 100;
+        Date in5Days = new Date(System.currentTimeMillis() + 6 * 24 * 60 * 60 * 1000);
+
+        assertEquals(128, priceModifier.applyingDateModifierOnPrice(in5Days,priceModified, basePrice));
+    }
+
+    @Test
     void UpdateBasePriceAccordingToDate_departureDateIn5Days() {
         double basePrice = 100.00;
-        double priceModified = 120;
+        double priceModified = 100;
         Date in5Days = new Date(System.currentTimeMillis() + 5 * 24 * 60 * 60 * 1000);
 
-        assertEquals(220, priceModifier.applyingDateModifierOnPrice(in5Days,priceModified, basePrice));
+        assertEquals(200, priceModifier.applyingDateModifierOnPrice(in5Days,priceModified, basePrice));
     }
 
     @Test
@@ -205,6 +215,34 @@ PriceModifierService priceModifier;
 
         assertEquals(120, priceModifier.applyingDateModifierOnPrice(in10Days,priceModified, basePrice));
     }
+
+    @Test
+    void UpdateBasePriceAccordingToDate_departureDateIn6hours() {
+        double basePrice = 100.00;
+        double priceModified = 100;
+        Date in10Days = new Date(System.currentTimeMillis() + ( 24 * 60 * 60 * 1000) - (18 * 60 * 60 * 1000));
+
+        assertEquals(80, priceModifier.applyingDateModifierOnPrice(in10Days,priceModified, basePrice));
+    }
+
+    @Test
+    void UpdateBasePriceAccordingToDate_departureDateIn7hours() {
+        double basePrice = 100.00;
+        double priceModified = 100;
+        Date in10Days = new Date(System.currentTimeMillis() + ( 24 * 60 * 60 * 1000) - (17 * 60 * 60 * 1000));
+
+        assertEquals(200, priceModifier.applyingDateModifierOnPrice(in10Days,priceModified, basePrice));
+    }
+
+    @Test
+    void UpdateBasePriceAccordingToDate_departureDateIn5hours() {
+        double basePrice = 100.00;
+        double priceModified = 100;
+        Date in10Days = new Date(System.currentTimeMillis() + ( 24 * 60 * 60 * 1000) - (19 * 60 * 60 * 1000));
+
+        assertEquals(80, priceModifier.applyingDateModifierOnPrice(in10Days,priceModified, basePrice));
+    }
+
     ////////////
 
     //////// DISCOUNT TEST CI DESSOUS
@@ -221,11 +259,11 @@ PriceModifierService priceModifier;
                         .build())
                 .withPassenger(new PassengerBuilder()
                         .age(36)
-                        .withDiscount(DiscountCard.Couple)
+                        .withDiscount(DiscountCard.COUPLE)
                         .build())
                 .withPassenger(new PassengerBuilder()
                         .age(39)
-                        .withDiscount(DiscountCard.Couple)
+                        .withDiscount(DiscountCard.COUPLE)
                         .build())
                 .build();
 
@@ -245,11 +283,11 @@ PriceModifierService priceModifier;
                         .build())
                 .withPassenger(new PassengerBuilder()
                         .age(15)
-                        .withDiscount(DiscountCard.Couple)
+                        .withDiscount(DiscountCard.COUPLE)
                         .build())
                 .withPassenger(new PassengerBuilder()
                         .age(15)
-                        .withDiscount(DiscountCard.Couple)
+                        .withDiscount(DiscountCard.COUPLE)
                         .build())
                 .build();
 
@@ -293,7 +331,7 @@ PriceModifierService priceModifier;
                         .build())
                 .withPassenger(new PassengerBuilder()
                         .age(36)
-                        .withDiscount(DiscountCard.HalfCouple)
+                        .withDiscount(DiscountCard.HALF_COUPLE)
                         .build())
                 .build();
 
@@ -332,7 +370,7 @@ PriceModifierService priceModifier;
                         .build())
                 .withPassenger(new PassengerBuilder()
                         .age(15)
-                        .withDiscount(DiscountCard.HalfCouple)
+                        .withDiscount(DiscountCard.HALF_COUPLE)
                         .build())
                 .build();
 
@@ -351,7 +389,7 @@ PriceModifierService priceModifier;
                         .build())
                 .withPassenger(new PassengerBuilder()
                         .age(36)
-                        .withDiscount(DiscountCard.TrainStroke)
+                        .withDiscount(DiscountCard.TRAINSTROKE)
                         .build())
                 .build();
 
@@ -371,11 +409,11 @@ PriceModifierService priceModifier;
                         .build())
                 .withPassenger(new PassengerBuilder()
                         .age(36)
-                        .withDiscount(DiscountCard.TrainStroke)
+                        .withDiscount(DiscountCard.TRAINSTROKE)
                         .build())
                 .withPassenger(new PassengerBuilder()
                         .age(36)
-                        .withDiscount(DiscountCard.Couple)
+                        .withDiscount(DiscountCard.COUPLE)
                         .build())
                 .build();
 
@@ -395,12 +433,12 @@ PriceModifierService priceModifier;
                         .build())
                 .withPassenger(new PassengerBuilder()
                         .age(65)
-                        .withDiscount(DiscountCard.Couple)
+                        .withDiscount(DiscountCard.COUPLE)
                         .build())
                 .withPassenger(new PassengerBuilder()
                         .age(80)
-                        .withDiscount(DiscountCard.Senior)
-                        .withDiscount(DiscountCard.Couple)
+                        .withDiscount(DiscountCard.SENIOR)
+                        .withDiscount(DiscountCard.COUPLE)
                         .build())
                 .build();
 
@@ -420,13 +458,13 @@ PriceModifierService priceModifier;
                         .build())
                 .withPassenger(new PassengerBuilder()
                         .age(81)
-                        .withDiscount(DiscountCard.Senior)
-                        .withDiscount(DiscountCard.Couple)
+                        .withDiscount(DiscountCard.SENIOR)
+                        .withDiscount(DiscountCard.COUPLE)
                         .build())
                 .withPassenger(new PassengerBuilder()
                         .age(80)
-                        .withDiscount(DiscountCard.Senior)
-                        .withDiscount(DiscountCard.Couple)
+                        .withDiscount(DiscountCard.SENIOR)
+                        .withDiscount(DiscountCard.COUPLE)
                         .build())
                 .build();
 
@@ -446,11 +484,11 @@ PriceModifierService priceModifier;
                         .build())
                 .withPassenger(new PassengerBuilder()
                         .age(50)
-                        .withDiscount(DiscountCard.Couple)
+                        .withDiscount(DiscountCard.COUPLE)
                         .build())
                 .withPassenger(new PassengerBuilder()
                         .age(30)
-                        .withDiscount(DiscountCard.Couple)
+                        .withDiscount(DiscountCard.COUPLE)
                         .build())
                 .withPassenger(new PassengerBuilder()
                         .age(18)
@@ -473,8 +511,8 @@ PriceModifierService priceModifier;
                         .build())
                 .withPassenger(new PassengerBuilder()
                         .age(36)
-                        .withDiscount(DiscountCard.HalfCouple)
-                        .withDiscount(DiscountCard.TrainStroke)
+                        .withDiscount(DiscountCard.HALF_COUPLE)
+                        .withDiscount(DiscountCard.TRAINSTROKE)
                         .build())
                 .build();
 
@@ -494,11 +532,11 @@ PriceModifierService priceModifier;
                         .build())
                 .withPassenger(new PassengerBuilder()
                         .age(36)
-                        .withDiscount(DiscountCard.HalfCouple)
+                        .withDiscount(DiscountCard.HALF_COUPLE)
                         .build())
                 .withPassenger(new PassengerBuilder()
                         .age(36)
-                        .withDiscount(DiscountCard.HalfCouple)
+                        .withDiscount(DiscountCard.HALF_COUPLE)
                         .build())
                 .build();
 
@@ -506,5 +544,6 @@ PriceModifierService priceModifier;
         TrainTicketEstimator estimator = trainEstimatorBuilder.withTripRequest(tripRequest).build();
 
         assertEquals(200, estimator.estimate());
+        
     }
 }

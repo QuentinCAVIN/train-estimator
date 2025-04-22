@@ -72,7 +72,7 @@ public class PriceModifierServiceTest {
     void BasePriceWithAge70WitDiscountCard_ShouldReturn60e() {
         double basePrice = 100.00;
         Passenger passenger = new PassengerBuilder()
-                .withDiscount(DiscountCard.Senior)
+                .withDiscount(DiscountCard.SENIOR)
                 .age(71)
                 .build();
 

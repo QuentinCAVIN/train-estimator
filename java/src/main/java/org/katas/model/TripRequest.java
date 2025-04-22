@@ -10,15 +10,15 @@ public record TripRequest(TripDetails details, List<Passenger> passengers) {
     public boolean isEligibleCouple() {
         return passengers.size() == 2 &&
                 passengers.stream().allMatch(Passenger::isMajor) &&
-                passengers.stream().anyMatch(p -> p.discounts().contains(DiscountCard.Couple)) &&
-                passengers.stream().noneMatch(p -> p.discounts().contains(DiscountCard.TrainStroke));
+                passengers.stream().anyMatch(p -> p.discounts().contains(DiscountCard.COUPLE)) &&
+                passengers.stream().noneMatch(p -> p.discounts().contains(DiscountCard.TRAINSTROKE));
     }
 
     public boolean isEligibleHalfCouple() {
         return passengers.size() == 1 &&
                 passengers.stream().allMatch(Passenger::isMajor) &&
-                passengers.stream().anyMatch(p -> p.discounts().contains(DiscountCard.HalfCouple)) &&
-                passengers.stream().noneMatch(p -> p.discounts().contains(DiscountCard.TrainStroke));
+                passengers.stream().anyMatch(p -> p.discounts().contains(DiscountCard.HALF_COUPLE)) &&
+                passengers.stream().noneMatch(p -> p.discounts().contains(DiscountCard.TRAINSTROKE));
     }
 
     public void isValid() {

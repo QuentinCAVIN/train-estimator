@@ -35,7 +35,7 @@ public class TrainTicketEstimator {
     private double calculateFinalPriceForPassenger(Passenger passenger, double basePrice) {
         double price = priceModifier.applyingAgeModifierOnPrice(passenger, basePrice);
         price = priceModifier.applyingDateModifierOnPrice(trainDetails.details().when(), price, basePrice);
-        return priceModifier.applyDiscounts(passenger, price, basePrice);
+        return priceModifier.applyIndividualDiscounts(passenger, price, basePrice);
     }
 
     private double applyGroupDiscount(double total, double basePrice) {

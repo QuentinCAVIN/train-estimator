@@ -14,6 +14,8 @@ public class BookingService {
             return BookingTiming.EARLY;
         } else if (daysBeforeDeparture >= 6) {
             return BookingTiming.STANDARD;
+        } else if (daysBeforeDeparture > 0.25) {
+            return BookingTiming.LATE;
         } else {
             return BookingTiming.LAST_MINUTE;
         }

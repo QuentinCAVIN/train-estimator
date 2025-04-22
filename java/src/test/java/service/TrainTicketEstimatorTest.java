@@ -33,7 +33,7 @@ class TrainTicketEstimatorTest {
     }
 
     @Test
-    // Utilise l'ancienne signature de la méthode estimate()
+        // Utilise l'ancienne signature de la méthode estimate()
     void backwardsCompatibilityTest() {
         TrainTicketEstimator trainTicketEstimator = new TrainTicketEstimator();
         TripRequest tripRequest = new TripRequestBuilder()
@@ -187,7 +187,6 @@ class TrainTicketEstimatorTest {
 
         assertEquals(0, estimator.estimate());
     }
-
 
 
     /*********************************************************************
@@ -447,7 +446,8 @@ class TrainTicketEstimatorTest {
 
         assertEquals(300, estimator.estimate());
     }
-/// /
+
+    /// /
     @Test
     void shouldApplyTrainStrokeDiscountOnly_whenPassengerHasHalfCoupleAndTrainStrokeDiscountsButIsAlone() {
         TripRequest tripRequest = new TripRequestBuilder()
@@ -586,5 +586,42 @@ class TrainTicketEstimatorTest {
         TrainTicketEstimator estimator = trainEstimatorBuilder.withTripRequest(tripRequest).build();
 
         assertEquals(260, estimator.estimate());
+    }
+
+    //TODO Vérifier avec l'équipe de dev du Larzac s'il s'agit d'un comportement souhaité dans l'avenir
+    @Test
+    void ParentsShouldNotLetTheirKidsTravelALoneButItsSoCheap() {
+        Date now = new Date();
+        Date inFiveMinutes = new Date(now.getTime() + (5 * 60 * 1000));
+        TripRequest tripRequest = new TripRequestBuilder()
+                .withDetails(new TripDetailsBuilder()
+                        .from("Bordeaux")
+                        .to("Paris")
+                        .when(in31Days)
+                        .build())
+                .withPassenger(new PassengerBuilder()
+                        .age(0)
+                        .lastName("Hemery")
+                        .withDiscount(DiscountCard.FAMILY)
+                        .build())
+                .withPassenger(new PassengerBuilder()
+                        .age(1)
+                        .lastName("Hemery")
+                        .withDiscount(DiscountCard.TRAINSTROKE)
+                        .withDiscount(DiscountCard.SENIOR)
+                        .withDiscount(DiscountCard.FAMILY)
+                        .withDiscount(DiscountCard.HALF_COUPLE)
+                        .build())
+                .withPassenger(new PassengerBuilder()
+                        .age(2)
+                        .lastName("Hemery")
+                        .withDiscount(DiscountCard.FAMILY)
+                        .build())
+                .build();
+
+        fakeBasePriceRepository.setBasePrice(10000);
+        TrainTicketEstimator estimator = trainEstimatorBuilder.withTripRequest(tripRequest).build();
+
+        assertEquals(-132, estimator.estimate());
     }
 }

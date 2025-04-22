@@ -3,7 +3,6 @@ package org.katas.service;
 import org.katas.helper.DateHelper;
 import org.katas.model.*;
 
-
 import org.katas.model.Passenger;
 
 import java.util.Date;
@@ -58,7 +57,9 @@ public class PriceModifierService {
 
     public double applyGroupDiscounts(TripRequest trainDetails, double total, double basePrice) {
 
-        if (trainDetails.isEligibleCouple()) {
+        if (trainDetails.isEligibleFamily()) {
+            total -= basePrice * 0.3 * trainDetails.passengers().size();
+        } else if (trainDetails.isEligibleCouple()) {
             total -= basePrice * 0.2 * 2;
         } else if (trainDetails.isEligibleHalfCouple()) {
             total -= basePrice * 0.1;

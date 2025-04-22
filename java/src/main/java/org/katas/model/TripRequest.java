@@ -21,6 +21,20 @@ public record TripRequest(TripDetails details, List<Passenger> passengers) {
                 passengers.stream().noneMatch(p -> p.discounts().contains(DiscountCard.TRAINSTROKE));
     }
 
+    public boolean isEligibleFamily() {
+        if (passengers.size() <= 1) return false;
+
+        boolean hasFamilyCard = passengers.stream()
+                .anyMatch(p -> p.discounts().contains(DiscountCard.FAMILY));
+
+        String referenceLastName = passengers.get(0).lastName();
+
+        boolean allSameLastName = passengers.stream()
+                .allMatch(p -> p.lastName().equalsIgnoreCase(referenceLastName));
+
+        return hasFamilyCard && allSameLastName;
+    }
+
     public void isValid() {
         if (passengers().isEmpty()) {
             throw new InvalidTripInputException("No passenger");

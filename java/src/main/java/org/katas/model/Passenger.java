@@ -4,7 +4,7 @@ import org.katas.exceptions.InvalidTripInputException;
 
 import java.util.List;
 
-public record Passenger(int age, List<DiscountCard> discounts) {
+public record Passenger(int age, List<DiscountCard> discounts, String lastName) {
 
     public boolean isInfant() {
         return age < 1;

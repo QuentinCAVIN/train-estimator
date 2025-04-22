@@ -1,6 +1,6 @@
 package org.katas.builder;
 
-import org.katas.TrainTicketEstimator;
+import org.katas.service.TrainTicketEstimator;
 import org.katas.fake.FakeBasePriceRepository;
 import org.katas.model.TripRequest;
 import org.katas.repository.IBasePriceRepository;

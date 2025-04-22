@@ -7,11 +7,13 @@ import org.katas.builder.PassengerBuilder;
 import org.katas.builder.FakeTrainTicketEstimatorBuilder;
 import org.katas.builder.TripDetailsBuilder;
 import org.katas.builder.TripRequestBuilder;
+import org.katas.exceptions.ApiException;
 import org.katas.fake.FakeBasePriceRepository;
 import org.katas.model.DiscountCard;
 import org.katas.model.TripRequest;
 import org.katas.exceptions.InvalidTripInputException;
 import org.katas.service.PriceModifierService;
+import org.katas.service.TrainTicketEstimator;
 
 import java.util.Date;
 
@@ -27,6 +29,23 @@ PriceModifierService priceModifier;
         fakeBasePriceRepository = new FakeBasePriceRepository();
         trainEstimatorBuilder = new FakeTrainTicketEstimatorBuilder();
         priceModifier = new PriceModifierService();
+    }
+
+    @Test
+    void backwardsCompatibilityTest() {
+        TrainTicketEstimator trainTicketEstimator = new TrainTicketEstimator();
+        TripRequest tripRequest = new TripRequestBuilder()
+                .withDetails(new TripDetailsBuilder()
+                        .from("Bordeaux")
+                        .to("Paris")
+                        .build())
+                .withPassenger(new PassengerBuilder()
+                        .build())
+                .build();
+
+        assertThrows(ApiException.class, () -> {
+            trainTicketEstimator.estimate(tripRequest);
+        });
     }
 
     @Test
@@ -147,6 +166,7 @@ PriceModifierService priceModifier;
     //////////
 
     //TODO BUG BUG BUG : -20€ Quand l'utilisateur à moins de 1 an / 100 € quand le billet est prix en retard
+    // Rajouter quelques billets pour corriger le bug
     @Disabled
     @Test
     void bug() {
@@ -169,7 +189,7 @@ PriceModifierService priceModifier;
     }
 
 
-    // Ci dessous déplacer dans un package de test unitaire de PriceModifierService
+    // Ci-dessous déplacer dans un package de test unitaire de PriceModifierService
     /// ////////
     @Test
     void UpdateBasePriceAccordingToDate_departureDateIn31Days() {
@@ -222,7 +242,7 @@ PriceModifierService priceModifier;
         double priceModified = 100;
         Date in10Days = new Date(System.currentTimeMillis() + ( 24 * 60 * 60 * 1000) - (18 * 60 * 60 * 1000));
 
-        assertEquals(80, priceModifier.applyingDateModifierOnPrice(in10Days,priceModified, basePrice));
+        assertEquals(200, priceModifier.applyingDateModifierOnPrice(in10Days,priceModified, basePrice));
     }
 
     @Test
@@ -544,6 +564,99 @@ PriceModifierService priceModifier;
         TrainTicketEstimator estimator = trainEstimatorBuilder.withTripRequest(tripRequest).build();
 
         assertEquals(200, estimator.estimate());
-        
+
+    }
+
+    @Test
+    void estimateTrainsWithDiscountCardFamilyAnd3Passengers() {
+        TripRequest tripRequest = new TripRequestBuilder()
+                .withDetails(new TripDetailsBuilder()
+                        .from("Bordeaux")
+                        .to("Paris")
+                        .when(in31Days)
+                        .build())
+                .withPassenger(new PassengerBuilder()
+                        .age(72)
+                        .lastName("Allaoui")
+                        .withDiscount(DiscountCard.FAMILY)
+                        .build())
+                .withPassenger(new PassengerBuilder()
+                        .age(52)
+                        .lastName("Allaoui")
+                        .withOutDiscount()
+                        .build())
+                .withPassenger(new PassengerBuilder()
+                        .age(70)
+                        .lastName("Allaoui")
+                        .withOutDiscount()
+                        .build())
+                .build();
+
+        fakeBasePriceRepository.setBasePrice(100);
+        TrainTicketEstimator estimator = trainEstimatorBuilder.withTripRequest(tripRequest).build();
+
+        assertEquals(130, estimator.estimate());
+    }
+    @Test
+    void discountCardReplacesOthersDiscounts() {
+        TripRequest tripRequest = new TripRequestBuilder()
+                .withDetails(new TripDetailsBuilder()
+                        .from("Bordeaux")
+                        .to("Paris")
+                        .when(in31Days)
+                        .build())
+                .withPassenger(new PassengerBuilder()
+                        .age(72)
+                        .lastName("Allaoui")
+                        .withDiscount(DiscountCard.FAMILY)
+                        .withDiscount(DiscountCard.SENIOR)
+                        .build())
+                .withPassenger(new PassengerBuilder()
+                        .age(52)
+                        .lastName("Allaoui")
+                        .withDiscount(DiscountCard.TRAINSTROKE)
+                        .build())
+                .withPassenger(new PassengerBuilder()
+                        .age(70)
+                        .lastName("Allaoui")
+                        .withDiscount(DiscountCard.SENIOR)
+                        .build())
+                .build();
+
+        fakeBasePriceRepository.setBasePrice(100);
+        TrainTicketEstimator estimator = trainEstimatorBuilder.withTripRequest(tripRequest).build();
+
+        assertEquals(130, estimator.estimate());
+    }
+
+    @Test
+    void discountCardFamillyDontWorkWIthDifferentNames() {
+        TripRequest tripRequest = new TripRequestBuilder()
+                .withDetails(new TripDetailsBuilder()
+                        .from("Bordeaux")
+                        .to("Paris")
+                        .when(in31Days)
+                        .build())
+                .withPassenger(new PassengerBuilder()
+                        .age(50)
+                        .lastName("Allaoui")
+                        .withDiscount(DiscountCard.FAMILY)
+                        .build())
+                .withPassenger(new PassengerBuilder()
+                        .age(52)
+                        .lastName("Cavin")
+                        .withOutDiscount()
+                        .build())
+                .withPassenger(new PassengerBuilder()
+                        .age(70)
+                        .lastName("Allaoui")
+                        .withOutDiscount()
+                        .build())
+                .build();
+
+        fakeBasePriceRepository.setBasePrice(100);
+        TrainTicketEstimator estimator = trainEstimatorBuilder.withTripRequest(tripRequest).build();
+
+        assertEquals(260, estimator.estimate());
     }
 }

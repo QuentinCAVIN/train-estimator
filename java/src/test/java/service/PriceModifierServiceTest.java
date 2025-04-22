@@ -28,10 +28,29 @@ public class PriceModifierServiceTest {
         assertEquals(0, priceModifier.applyingAgeModifierOnPrice(passenger, basePrice));
     }
     @Test
+    void BasePriceWithAge1_ShouldReturn() {
+        double basePrice = 100.00;
+        Passenger passenger = new PassengerBuilder()
+                .age(1)
+                .build();
+
+        assertEquals(9, priceModifier.applyingAgeModifierOnPrice(passenger, basePrice));
+    }
+    @Test
     void BasePriceWithAge2_ShouldReturn() {
         double basePrice = 100.00;
         Passenger passenger = new PassengerBuilder()
                 .age(2)
+                .build();
+
+        assertEquals(9, priceModifier.applyingAgeModifierOnPrice(passenger, basePrice));
+    }
+
+    @Test
+    void BasePriceWithAge3_ShouldReturn() {
+        double basePrice = 100.00;
+        Passenger passenger = new PassengerBuilder()
+                .age(3)
                 .build();
 
         assertEquals(9, priceModifier.applyingAgeModifierOnPrice(passenger, basePrice));

@@ -1,4 +1,4 @@
-package org.katas;
+package service;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
@@ -18,11 +18,12 @@ import org.katas.service.TrainTicketEstimator;
 import java.util.Date;
 
 import static org.junit.jupiter.api.Assertions.*;
+
 class TrainTicketEstimatorTest {
 
-FakeTrainTicketEstimatorBuilder trainEstimatorBuilder;
-FakeBasePriceRepository fakeBasePriceRepository;
-PriceModifierService priceModifier;
+    FakeTrainTicketEstimatorBuilder trainEstimatorBuilder;
+    FakeBasePriceRepository fakeBasePriceRepository;
+    PriceModifierService priceModifier;
 
     @BeforeEach
     public void setUp() {
@@ -32,6 +33,7 @@ PriceModifierService priceModifier;
     }
 
     @Test
+    // Utilise l'ancienne signature de la méthode estimate()
     void backwardsCompatibilityTest() {
         TrainTicketEstimator trainTicketEstimator = new TrainTicketEstimator();
         TripRequest tripRequest = new TripRequestBuilder()
@@ -48,8 +50,11 @@ PriceModifierService priceModifier;
         });
     }
 
+    /*************************************************
+     * Test de validation des données de TripDetails *
+     *************************************************/
     @Test
-    void estimateTrainsWithoutNoPassenger_ShouldReturn0() {
+    void shouldThrowException_WhenNoPassengerProvided() {
 
         TripRequest tripRequest = new TripRequestBuilder()
                 .withDetails(new TripDetailsBuilder()
@@ -65,11 +70,8 @@ PriceModifierService priceModifier;
 
     Date in31Days = new Date(System.currentTimeMillis() + 31L * 24 * 60 * 60 * 1000);
 
-
-    //Ci-dessous test des throws
-    ////////////////
     @Test
-    void estimateTrainsWithNoDepartureCity_ShouldThrowException() {
+    void shouldThrowException_WhenDepartureCityIsEmpty() {
         TripRequest tripRequest = new TripRequestBuilder()
                 .withDetails(new TripDetailsBuilder()
                         .from("")
@@ -86,7 +88,7 @@ PriceModifierService priceModifier;
     }
 
     @Test
-    void estimateTrainsWithNoArrivalCity_ShouldThrowException() {
+    void shouldThrowException_WhenArrivalCityIsEmpty() {
         TripRequest tripRequest = new TripRequestBuilder()
                 .withDetails(new TripDetailsBuilder()
                         .from("Bordeaux")
@@ -100,14 +102,11 @@ PriceModifierService priceModifier;
             trainEstimatorBuilder.withTripRequest(tripRequest).build();
         });
         assertEquals("Destination city is invalid", exception.getMessage());
-
     }
 
-    // TODO Prévoir la date null dans le code de prod?
-    @Disabled
+    @Disabled // TODO Faut-il prévoir le cas de la date null dans le code de production ?
     @Test
-    void estimateTrainsWithNullDate_ShouldThrowException() {
-
+    void shouldThrowException_WhenDateIsNull() {
         TripRequest tripRequest = new TripRequestBuilder()
                 .withDetails(new TripDetailsBuilder()
                         .from("Bordeaux")
@@ -124,9 +123,8 @@ PriceModifierService priceModifier;
         assertEquals("Date is invalid", exception.getMessage());
     }
 
-
     @Test
-    void estimateTrainsWithInvalidDate_ShouldThrowException() {
+    void shouldThrowException_WhenDateIsInPast() {
         Date yesterday = new Date(System.currentTimeMillis() - 24 * 60 * 60 * 1000);
         TripRequest tripRequest = new TripRequestBuilder()
                 .withDetails(new TripDetailsBuilder()
@@ -145,7 +143,7 @@ PriceModifierService priceModifier;
     }
 
     @Test
-    void estimateTrainsWithInvalidAge_ShouldThrowException() {
+    void shouldThrowException_WhenPassengerAgeIsNegative() {
         TripRequest tripRequest = new TripRequestBuilder()
                 .withDetails(new TripDetailsBuilder()
                         .from("Bordeaux")
@@ -156,15 +154,17 @@ PriceModifierService priceModifier;
                         .build())
                 .build();
 
-
         InvalidTripInputException exception = assertThrows(InvalidTripInputException.class, () -> {
             trainEstimatorBuilder.withTripRequest(tripRequest).build();
         });
         assertEquals("Age is invalid", exception.getMessage());
     }
 
-    //////////
 
+    /************************************************************
+     * Bug à corriger par la prochaine équipe de développement, *
+     * on se casse élever des chèvres dans le Larzac.           *
+     ************************************************************/
     //TODO BUG BUG BUG : -20€ Quand l'utilisateur à moins de 1 an / 100 € quand le billet est prix en retard
     // Rajouter quelques billets pour corriger le bug
     @Disabled
@@ -189,88 +189,12 @@ PriceModifierService priceModifier;
     }
 
 
-    // Ci-dessous déplacer dans un package de test unitaire de PriceModifierService
-    /// ////////
+
+    /*********************************************************************
+     * Test de l'ajustement des prix en fonction des cartes de réduction *
+     *********************************************************************/
     @Test
-    void UpdateBasePriceAccordingToDate_departureDateIn31Days() {
-        double basePrice = 100.00;
-        double priceModified = 120;
-        Date in31Days = new Date(System.currentTimeMillis() + 31L * 24 * 60 * 60 * 1000);
-
-        assertEquals(100, priceModifier.applyingDateModifierOnPrice(in31Days,priceModified, basePrice));
-    }
-
-    @Test
-    void UpdateBasePriceAccordingToDate_departureDateTomorrow() {
-        double basePrice = 100.00;
-        double priceModified = 120;
-        Date tomorrow = new Date(System.currentTimeMillis() + 24 * 60 * 60 * 1000);
-
-        assertEquals(220, priceModifier.applyingDateModifierOnPrice(tomorrow,priceModified, basePrice));
-    }
-
-    @Test
-    void UpdateBasePriceAccordingToDate_departureDateIn6Days() {
-        double basePrice = 100.00;
-        double priceModified = 100;
-        Date in5Days = new Date(System.currentTimeMillis() + 6 * 24 * 60 * 60 * 1000);
-
-        assertEquals(128, priceModifier.applyingDateModifierOnPrice(in5Days,priceModified, basePrice));
-    }
-
-    @Test
-    void UpdateBasePriceAccordingToDate_departureDateIn5Days() {
-        double basePrice = 100.00;
-        double priceModified = 100;
-        Date in5Days = new Date(System.currentTimeMillis() + 5 * 24 * 60 * 60 * 1000);
-
-        assertEquals(200, priceModifier.applyingDateModifierOnPrice(in5Days,priceModified, basePrice));
-    }
-
-    @Test
-    void UpdateBasePriceAccordingToDate_departureDateIn10Days() {
-        double basePrice = 100.00;
-        double priceModified = 100;
-        Date in10Days = new Date(System.currentTimeMillis() + 10 * 24 * 60 * 60 * 1000);
-
-        assertEquals(120, priceModifier.applyingDateModifierOnPrice(in10Days,priceModified, basePrice));
-    }
-
-    @Test
-    void UpdateBasePriceAccordingToDate_departureDateIn6hours() {
-        double basePrice = 100.00;
-        double priceModified = 100;
-        Date in10Days = new Date(System.currentTimeMillis() + ( 24 * 60 * 60 * 1000) - (18 * 60 * 60 * 1000));
-
-        assertEquals(200, priceModifier.applyingDateModifierOnPrice(in10Days,priceModified, basePrice));
-    }
-
-    @Test
-    void UpdateBasePriceAccordingToDate_departureDateIn7hours() {
-        double basePrice = 100.00;
-        double priceModified = 100;
-        Date in10Days = new Date(System.currentTimeMillis() + ( 24 * 60 * 60 * 1000) - (17 * 60 * 60 * 1000));
-
-        assertEquals(200, priceModifier.applyingDateModifierOnPrice(in10Days,priceModified, basePrice));
-    }
-
-    @Test
-    void UpdateBasePriceAccordingToDate_departureDateIn5hours() {
-        double basePrice = 100.00;
-        double priceModified = 100;
-        Date in10Days = new Date(System.currentTimeMillis() + ( 24 * 60 * 60 * 1000) - (19 * 60 * 60 * 1000));
-
-        assertEquals(80, priceModifier.applyingDateModifierOnPrice(in10Days,priceModified, basePrice));
-    }
-
-    ////////////
-
-    //////// DISCOUNT TEST CI DESSOUS
-    ///
-    ///
-    ///
-    @Test
-    void estimateTrainsWithCoupleAndDiscountCardCouple() {
+    void shouldApplyCoupleDiscount_whenTwoAdultsWithCoupleCard() {
         TripRequest tripRequest = new TripRequestBuilder()
                 .withDetails(new TripDetailsBuilder()
                         .from("Bordeaux")
@@ -294,7 +218,7 @@ PriceModifierService priceModifier;
     }
 
     @Test
-    void estimateTrainsWithCoupleMinorAndDiscountCardCouple() {
+    void shoulNotApplyCoupleDiscount_whenTwoMinorsWithCoupleCard() {
         TripRequest tripRequest = new TripRequestBuilder()
                 .withDetails(new TripDetailsBuilder()
                         .from("Bordeaux")
@@ -318,7 +242,7 @@ PriceModifierService priceModifier;
     }
 
     @Test
-    void estimateTrainsWithCoupleAndNoDiscount() {
+    void shouldNotApplyDiscount_whenTwoAdultsWithoutCard() {
         TripRequest tripRequest = new TripRequestBuilder()
                 .withDetails(new TripDetailsBuilder()
                         .from("Bordeaux")
@@ -342,7 +266,7 @@ PriceModifierService priceModifier;
     }
 
     @Test
-    void estimateTrainsWithNoCoupleAndDiscountCardHalfCouple() {
+    void shouldApplyHalfCoupleDiscount_whenOneAdultWithHalfCoupleCard() {
         TripRequest tripRequest = new TripRequestBuilder()
                 .withDetails(new TripDetailsBuilder()
                         .from("Bordeaux")
@@ -361,8 +285,9 @@ PriceModifierService priceModifier;
 
         assertEquals(90, estimator.estimate());
     }
+
     @Test
-    void estimateTrainsWithNoCoupleAndNoDiscount() {
+    void shouldNotApplyDiscount_whenOneAdultWithoutCard() {
         TripRequest tripRequest = new TripRequestBuilder()
                 .withDetails(new TripDetailsBuilder()
                         .from("Bordeaux")
@@ -380,8 +305,9 @@ PriceModifierService priceModifier;
 
         assertEquals(100, estimator.estimate());
     }
+
     @Test
-    void estimateTrainsWithNoCoupleMinorAndDiscountCardHalfCouple() {
+    void shouldNotApplyHalfCoupleDiscount_whenMinorWithHalfCoupleCard() {
         TripRequest tripRequest = new TripRequestBuilder()
                 .withDetails(new TripDetailsBuilder()
                         .from("Bordeaux")
@@ -399,8 +325,9 @@ PriceModifierService priceModifier;
 
         assertEquals(40, estimator.estimate());
     }
+
     @Test
-    void estimateTrainsWithDiscountCardTrainStroke() {
+    void shouldApplyTrainStrokeDiscount_whenPassengerHasTrainStrokeCard() {
         TripRequest tripRequest = new TripRequestBuilder()
                 .withDetails(new TripDetailsBuilder()
                         .from("Bordeaux")
@@ -420,7 +347,7 @@ PriceModifierService priceModifier;
     }
 
     @Test
-    void estimateTrainsWithDiscountCardTrainStrokeAndCouple() {
+    void shouldApplyOnlyTrainStrokeDiscountt_whenTwoPassengersHaveRespectiveCards() {
         TripRequest tripRequest = new TripRequestBuilder()
                 .withDetails(new TripDetailsBuilder()
                         .from("Bordeaux")
@@ -444,7 +371,7 @@ PriceModifierService priceModifier;
     }
 
     @Test
-    void estimateTrainsWithDiscountCard1SeniorAndCouple() {
+    void shouldApplyCoupleAndSeniorDiscount_whenOneSeniorAndOneCoupleCard() {
         TripRequest tripRequest = new TripRequestBuilder()
                 .withDetails(new TripDetailsBuilder()
                         .from("Bordeaux")
@@ -469,7 +396,7 @@ PriceModifierService priceModifier;
     }
 
     @Test
-    void estimateTrainsWithDiscountCard2SeniorAndCouple() {
+    void shouldApplyDoubleSeniorCoupleDiscount_whenTwoSeniorsWithBothCards() {
         TripRequest tripRequest = new TripRequestBuilder()
                 .withDetails(new TripDetailsBuilder()
                         .from("Bordeaux")
@@ -495,7 +422,7 @@ PriceModifierService priceModifier;
     }
 
     @Test
-    void estimateTrainsWithDiscountCardCoupleAnd3Passengers() {
+    void shouldNotApplyCoupleDiscount_whenThreePassengersPresent() {
         TripRequest tripRequest = new TripRequestBuilder()
                 .withDetails(new TripDetailsBuilder()
                         .from("Bordeaux")
@@ -520,9 +447,9 @@ PriceModifierService priceModifier;
 
         assertEquals(300, estimator.estimate());
     }
-
+/// /
     @Test
-    void estimateTrainsWithNoCoupleAndDiscountCardHalfCoupleAndTrainStoke() {
+    void shouldApplyTrainStrokeDiscountOnly_whenPassengerHasHalfCoupleAndTrainStrokeDiscountsButIsAlone() {
         TripRequest tripRequest = new TripRequestBuilder()
                 .withDetails(new TripDetailsBuilder()
                         .from("Bordeaux")
@@ -543,7 +470,7 @@ PriceModifierService priceModifier;
     }
 
     @Test
-    void estimateTrainsCoupleWithDiscountCardHalfCoupleAndHalfCouple() {
+    void shouldNoApplyDiscount_whenTwoPassengersHaveHalfCoupleDiscount() {
         TripRequest tripRequest = new TripRequestBuilder()
                 .withDetails(new TripDetailsBuilder()
                         .from("Bordeaux")
@@ -568,7 +495,7 @@ PriceModifierService priceModifier;
     }
 
     @Test
-    void estimateTrainsWithDiscountCardFamilyAnd3Passengers() {
+    void shouldApplyFamilyDiscount_whenThreePassengersShareSameLastNameAndOneHasFamilyCard() {
         TripRequest tripRequest = new TripRequestBuilder()
                 .withDetails(new TripDetailsBuilder()
                         .from("Bordeaux")
@@ -597,8 +524,9 @@ PriceModifierService priceModifier;
 
         assertEquals(130, estimator.estimate());
     }
+
     @Test
-    void discountCardReplacesOthersDiscounts() {
+    void shouldIgnoreOtherDiscounts_whenFamilyDiscountIsApplied() {
         TripRequest tripRequest = new TripRequestBuilder()
                 .withDetails(new TripDetailsBuilder()
                         .from("Bordeaux")
@@ -630,7 +558,7 @@ PriceModifierService priceModifier;
     }
 
     @Test
-    void discountCardFamillyDontWorkWIthDifferentNames() {
+    void shouldNotApplyFamilyDiscount_whenPassengersHaveDifferentLastNames() {
         TripRequest tripRequest = new TripRequestBuilder()
                 .withDetails(new TripDetailsBuilder()
                         .from("Bordeaux")

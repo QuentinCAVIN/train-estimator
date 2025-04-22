@@ -15,6 +15,7 @@ public class PassengerBuilder {
         this.age = age;
         return this;
     }
+
     public PassengerBuilder lastName(String lastName) {
         this.lastName = lastName;
         return this;
@@ -24,6 +25,7 @@ public class PassengerBuilder {
         this.discounts.add(card);
         return this;
     }
+
     public PassengerBuilder withOutDiscount() {
         return this;
     }

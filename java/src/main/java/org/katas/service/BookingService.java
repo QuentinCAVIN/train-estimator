@@ -8,7 +8,7 @@ import java.util.Date;
 public class BookingService {
 
     public BookingTiming determineBookingTiming(Date departure, Date today) {
-        int daysBeforeDeparture = DateHelper.getDifferenceInDays(departure, today);
+        double daysBeforeDeparture = DateHelper.getDifferenceInDays(departure, today);
 
         if (daysBeforeDeparture >= 30) {
             return BookingTiming.EARLY;

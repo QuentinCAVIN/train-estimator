@@ -19,6 +19,7 @@ public class TripRequestBuilder {
         this.passengers.add(passenger);
         return this;
     }
+
     public TripRequestBuilder withNoPassenger() {
         return this;
     }

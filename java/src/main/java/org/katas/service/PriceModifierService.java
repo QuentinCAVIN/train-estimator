@@ -37,7 +37,7 @@ public class PriceModifierService {
                 return priceModified - basePrice * 0.2;
 
             case STANDARD:
-                int diffDays = DateHelper.getDifferenceInDays(departure, today);
+                double diffDays = DateHelper.getDifferenceInDays(departure, today);
                 double surcharge = (20 - diffDays) * 0.02 * basePrice;
                 return priceModified + surcharge;
 

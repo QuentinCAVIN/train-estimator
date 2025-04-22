@@ -34,7 +34,7 @@ public class TrainTicketEstimator {
     private double calculateFinalPriceForPassenger(Passenger passenger, double basePrice) {
         double price = priceModifier.applyingAgeModifierOnPrice(passenger, basePrice);
         price = priceModifier.applyingDateModifierOnPrice(trainDetails.details().when(), price, basePrice);
-        if (!trainDetails.isEligibleFamily()){
+        if (!trainDetails.isEligibleFamily()) {
             price = priceModifier.applyIndividualDiscounts(passenger, price, basePrice);
         }
         return price;
@@ -45,8 +45,8 @@ public class TrainTicketEstimator {
     }
 
     /*************************************************************************
-    * Constructeur et méthode nécessaires pour assurer la rétrocompatibilité *
-    **************************************************************************/
+     * Constructeur et méthode nécessaires pour assurer la rétrocompatibilité *
+     **************************************************************************/
     public TrainTicketEstimator() {
         this.basePriceRepository = new BasePriceRepositoryImpl();
     }
@@ -56,5 +56,4 @@ public class TrainTicketEstimator {
         trainDetails.isValid();
         return estimate();
     }
-
 }

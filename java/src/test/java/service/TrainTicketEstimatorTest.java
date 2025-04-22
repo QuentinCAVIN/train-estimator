@@ -104,7 +104,7 @@ class TrainTicketEstimatorTest {
         assertEquals("Destination city is invalid", exception.getMessage());
     }
 
-    @Disabled // TODO Faut-il prévoir le cas de la date null dans le code de production ?
+
     @Test
     void shouldThrowException_WhenDateIsNull() {
         TripRequest tripRequest = new TripRequestBuilder()

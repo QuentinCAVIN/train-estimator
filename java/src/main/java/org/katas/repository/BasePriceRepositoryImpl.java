@@ -10,7 +10,7 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 
 public class BasePriceRepositoryImpl implements IBasePriceRepository {
-    // On inclut (et on ne teste pas) l'ApiExcpetion Fred et Eric sont ok avec ça
+    // On inclut (et on ne teste pas) l'ApiException. Fred et Eric sont ok avec ça.
     @Override
     public double getBasePrice(TripRequest trainDetails) {
         double basePrice;

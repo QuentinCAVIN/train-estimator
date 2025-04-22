@@ -7,7 +7,7 @@ import org.katas.model.TripRequest;
 import java.util.*;
 
 public class TripRequestBuilder {
-    private TripDetails details = new TripDetails("Paris", "Lyon", new Date(System.currentTimeMillis() + 86400000));
+    private TripDetails details ;
     private List<Passenger> passengers = new ArrayList<>();
 
     public TripRequestBuilder withDetails(TripDetails details) {
